@@ -140,7 +140,10 @@ export const searchFactories = async (clientId: number, filters: any): Promise<F
         if (!response.ok) {
             throw new Error(`Error posting factory: ${response.statusText}`);
         }
-        return await response.json();
+        const data = await response.json();
+
+
+        return data.content || data.data || data;
 
     } catch (error) {
         console.error("Error searching factories:", error);

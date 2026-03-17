@@ -45,7 +45,7 @@ export const Tarea2 = () => {
             <p>Tabla con Material UI y filtrado en el BackEnd en vez del Front</p>
 
             <FactoryFilter onFilter={handleFilter} />
-            <FactoryTableMui factories={factories} />
+            <FactoryTableMui factories={factories || []} />
         </div>
     );
 }

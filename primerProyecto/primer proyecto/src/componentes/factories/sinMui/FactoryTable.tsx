@@ -34,7 +34,7 @@ export const FactoryTable = ({ factories }: FactoryTableProps) => {
     return (
         // da error por el border, pero realmente no es importante,
         //  lo importante es mostrar los datos en la tabla
-        <table border="1" width="100%" textAlign="left" >
+        <table style={{ border: "1px solid black", width: "100%", textAlign: "center", marginTop: "20px" }}>
             <thead>
                 <tr>
                     <th>Código</th>

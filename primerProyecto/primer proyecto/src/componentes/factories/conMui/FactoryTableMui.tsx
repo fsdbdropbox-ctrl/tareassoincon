@@ -21,13 +21,14 @@ export const FactoryTableMui = ({ factories }: FactoryTableProps) => {
     return (
         <div>
 
-            <DataGrid
+            <DataGrid style={{ height: 400, width: "100%", marginTop: "20px" }}
                 rows={factories}
                 columns={columns}
                 pageSizeOptions={[5]}
                 initialState={{
                     pagination: { paginationModel: { pageSize: 5 } }
                 }}
+
                 disableRowSelectionOnClick
             />
         </div>
