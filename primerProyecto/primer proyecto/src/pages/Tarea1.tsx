@@ -17,11 +17,11 @@ import { Factory } from "../types/factory";
 // importamos el componente FactoryTable para mostrar los datos en una tabla
 // ejemplo de uso:
 // <FactoryTable factories={factories} /> en el return del componente
-import { FactoryTable } from "../componentes/factories/FactoryTable";
+import { FactoryTable } from "../componentes/factories/sinMui/FactoryTable";
 // importamos el componente FactoryFilter para mostrar el formulario de filtro
 // ejemplo de uso:
 // <FactoryFilter onFilter={handleFilter} /> en el return del componente
-import { FactoryFilter, FactoryFilterValues } from "../componentes/factories/FactoryFilter";
+import { FactoryFilter, FactoryFilterValues } from "../componentes/factories/sinMui/FactoryFilter";
 
 
 

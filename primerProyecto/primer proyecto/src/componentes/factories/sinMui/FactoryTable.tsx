@@ -3,7 +3,7 @@
 //  y renderizarlos en una tabla.
 // se importa la interfaz Factory para tipar los datos que
 //  se reciben del servicio
-import { Factory } from "../../types/factory";
+import { Factory } from "../../../types/factory";
 
 // definmos los props, en este caso un array de fábricas
 //  que se espera recibir del componente padre
