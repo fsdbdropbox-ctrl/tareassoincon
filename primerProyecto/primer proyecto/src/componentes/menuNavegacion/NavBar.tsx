@@ -22,14 +22,20 @@ interface Props {
 // <NavBar opciones={[{texto: "Home", vista: "dashboard"}, {texto: "Tarea 1", vista: "tarea1"}, {texto: "Tarea 2", vista: "tarea2"}]} cambiarVista={setVista} />
 export const NavBar = ({ opciones, cambiarVista }: Props) => {
     return (
-        <nav>
+        <nav
+            style={{
+                display: "flex",
+                flexWrap: "wrap",
+            }}>
             {/* mostramos un botón para cada opción de navegación */}
             {/* cuando se hace clic en un botón llamamos a la función cambiarVista con la vista correspondiente */}
-            {opciones.map((opcion, index) => (
-                <button key={index} onClick={() => cambiarVista(opcion.vista)}>
-                    {opcion.texto}
-                </button>
-            ))}
-        </nav>
+            {
+                opciones.map((opcion, index) => (
+                    <button key={index} onClick={() => cambiarVista(opcion.vista)}>
+                        {opcion.texto}
+                    </button>
+                ))
+            }
+        </nav >
     );
 }

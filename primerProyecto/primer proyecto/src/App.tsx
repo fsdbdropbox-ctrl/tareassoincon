@@ -4,6 +4,7 @@ import { Home } from './pages/Home';
 import { Tarea1 } from './pages/Tarea1';
 import { Tarea2 } from './pages/Tarea2';
 import { NavBar } from './componentes/menuNavegacion/NavBar';
+import { CssBaseline } from '@mui/material';
 function App() {
 
   // estado para controlar la vista actual
@@ -16,6 +17,7 @@ function App() {
   return (
     <>
       <div>
+        <CssBaseline />
         {/* Primera prueba de llamada a un componente /componentes/boton/MyButton */}
         {/* <MyButton texto="Guardar" />
         <MyButton texto="Cancelar" /> */}

@@ -102,9 +102,6 @@ export const FactoryFilter = ({ onFilter }: FactoryFilterProps) => {
             </button>
 
             {boolInvisible && (
-                // el <> es un fragmento de React, que nos permite devolver varios elementos sin necesidad de envolverlos en un div
-                // en este caso, devolvemos el botón de limpiar filtro y los campos del filtro sin necesidad de envolverlos en un div
-                // si no lo ponemos da error, ya que el return solo puede devolver un elemento, y al tener varios elementos sin envolverlos en un div, da error
                 <div>
                     <div>
                         <input

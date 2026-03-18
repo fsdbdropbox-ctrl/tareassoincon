@@ -2,6 +2,7 @@
 // src/api/factoryService.ts
 // esto sirve para obtener las fábricas
 // de un cliente específico desde la API
+import { GridSortModel } from "@mui/x-data-grid/models";
 import { Factory } from "../types/factory";
 
 // URL base de la API, ajusta esto según la api que estés utilizando
@@ -125,11 +126,23 @@ export const getFactories = async (clientId: number): Promise<Factory[]> => {
     }
 }
 
-export const searchFactories = async (clientId: number, filters: any): Promise<Factory[]> => {
+export const searchFactories = async (
+    clientId: number,
+    filters: any,
+    page: number,
+    size: number,
+    sortModel: GridSortModel
+): Promise<{ factories: Factory[], total: number }> => {
     const token = await getValidToken();
 
     try {
-        const response = await fetch(`${BASE_URL}/v1/clients/${clientId}/locations/search`, {
+        let url = `${BASE_URL}/v1/clients/${clientId}/locations/search?page=${page}&size=${size}`;
+
+        if (sortModel && sortModel.length > 0) {
+            const sort = sortModel[0];
+            url += `&sort=${sort.field}%3B${sort.sort}`;
+        }
+        const response = await fetch(url, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -143,7 +156,10 @@ export const searchFactories = async (clientId: number, filters: any): Promise<F
         const data = await response.json();
 
 
-        return data.content || data.data || data;
+        return {
+            factories: data.content || [],
+            total: data.totalElements || 0
+        };
 
     } catch (error) {
         console.error("Error searching factories:", error);
