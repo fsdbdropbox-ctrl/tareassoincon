@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
-import { searchFactories } from "../api/factoryService";
+import { searchFactories, createFactory, updateFactory, deleteFactory } from "../api/factoryService";
 import { Factory } from "../types/factory";
 import { FactoryTableMui } from "../componentes/factories/conMui/FactoryTableMui";
 import { FactoryFilterMui, FactoryFilterValuesMui } from "../componentes/factories/conMui/FactoryFilterMui";
 import { Box } from "@mui/material";
-import { GridSortModel } from "@mui/x-data-grid";
+import { GridSortModel, GridRowSelectionModel } from "@mui/x-data-grid";
+import { FactoryDialogMui } from "../componentes/factories/conMui/FactoryDialogMui";
+
 
 export const Tarea2 = () => {
 
@@ -40,6 +42,69 @@ export const Tarea2 = () => {
     const [sortModel, setSortModel] = useState<GridSortModel>([]);
     const [loading, setLoading] = useState(false);
 
+    // Estados para el CRUD
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [selectedFactory, setSelectedFactory] = useState<Factory | null>(null);
+    const [selectedRowIds, setSelectedRowIds] = useState<GridRowSelectionModel>([]);
+
+    const handleAddClick = () => {
+        setSelectedFactory(null);
+        setIsDialogOpen(true);
+    };
+
+    const handleEditClick = (factory: Factory) => {
+        setSelectedFactory(factory);
+        setIsDialogOpen(true);
+    };
+
+    const handleCloseDialog = () => {
+        setIsDialogOpen(false);
+        setSelectedFactory(null);
+    }
+
+    const handleDeleteSelected = async () => {
+        const confirmacion = window.confirm(`¿Seguro que quieres borrar ${selectedRowIds.length} fábricas?`);
+        if (!confirmacion) return;
+        try {
+            setLoading(true);
+            await Promise.all(selectedRowIds.map(id => deleteFactory(1, Number(id))));
+
+            alert("Fábricas borradas correctamente");
+
+            await fetchFactories(currentFilters, paginationModel.page, paginationModel.pageSize, sortModel);
+            setSelectedRowIds([]);
+        } catch (error) {
+            console.error("Error deleting factories:", error);
+        } finally {
+            setLoading(false);
+        }
+
+    }
+
+    const handleSaveFactory = async (formData: Partial<Factory>) => {
+        try {
+            setLoading(true);
+            const clientId = 1;
+
+            if (selectedFactory && selectedFactory.id) {
+                const updatedFactory = { ...selectedFactory, ...formData };
+                await updateFactory(clientId, selectedFactory.id, updatedFactory);
+            } else {
+                await createFactory(clientId, formData);
+            }
+            await fetchFactories(currentFilters, paginationModel.page, paginationModel.pageSize, sortModel);
+            handleCloseDialog();
+        } catch (error) {
+            console.error("Error saving factory:", error);
+            alert("Error al guardar la fábrica");
+        }
+        finally {
+            setLoading(false);
+        }
+    }
+
+
+
     const fetchFactories = async (
         filters: FactoryFilterValuesMui,
         page: number,
@@ -49,7 +114,7 @@ export const Tarea2 = () => {
         setLoading(true);
         try {
             const filteredFactories = Object.fromEntries(
-                Object.entries(filters).filter(([key, value]) => value !== "")
+                Object.entries(filters).filter(([_, value]) => value !== "")
             );
             const results = await searchFactories(
                 1,
@@ -107,6 +172,19 @@ export const Tarea2 = () => {
                 onSortModelChange={setSortModel}
                 loading={loading}
 
+                // Manejadores para el CRUD
+                onAddClick={handleAddClick}
+                onEditClick={handleEditClick}
+                onSelectionModelChange={setSelectedRowIds}
+                onDeleteSelected={handleDeleteSelected}
+                selectedIds={selectedRowIds}
+            />
+
+            <FactoryDialogMui
+                open={isDialogOpen}
+                onClose={handleCloseDialog}
+                onSave={handleSaveFactory}
+                factoryToEdit={selectedFactory}
             />
         </Box>
     );

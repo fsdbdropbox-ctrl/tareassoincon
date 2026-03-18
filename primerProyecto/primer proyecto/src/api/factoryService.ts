@@ -165,5 +165,53 @@ export const searchFactories = async (
         console.error("Error searching factories:", error);
         throw error;
     }
+
 }
 
+
+export const createFactory = async (clientId: number, factoryData: Partial<Factory>): Promise<Factory> => {
+    const token = await getValidToken();
+
+    const response = await fetch(`${BASE_URL}/v1/clients/${clientId}/locations`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify(factoryData)
+    });
+    if (!response.ok) {
+        throw new Error(`Error creating location: ${response.statusText}`);
+    }
+    return response.json();
+};
+
+
+export const updateFactory = async (clientId: number, factoryId: number, factoryData: Partial<Factory>): Promise<Factory> => {
+    const token = await getValidToken();
+    const response = await fetch(`${BASE_URL}/v1/clients/${clientId}/locations/${factoryId}`, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify(factoryData)
+    });
+    if (!response.ok) {
+        throw new Error(`Error updating location: ${response.statusText}`);
+    }
+    return response.json();
+}
+
+export const deleteFactory = async (clientId: number, factoryId: number): Promise<void> => {
+    const token = await getValidToken();
+    const response = await fetch(`${BASE_URL}/v1/clients/${clientId}/locations/${factoryId}`, {
+        method: "DELETE",
+        headers: {
+            "Authorization": `Bearer ${token}`
+        }
+    });
+    if (!response.ok) {
+        throw new Error(`Error deleting location: ${response.statusText}`);
+    }
+}
