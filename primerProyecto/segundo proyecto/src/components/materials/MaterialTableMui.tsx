@@ -64,21 +64,28 @@ export const MaterialTableMui = ({
 
     return (
         <div style={{ height: 400, width: "100%", marginTop: "20px" }}>
-            <Box sx={{ marginBottom: 1, display: "flex", justifyContent: "flex-start" }}>
-                <Button
-                    variant="contained"
-                    onClick={onAddClick}
-                    sx={{ backgroundColor: "#298d29", color: "white", fontWeight: "bold", "&:hover": { backgroundColor: "#1e6b1e" } }}
-                >
-                    + Agregar Material
-                </Button>
-                <Button
-                    variant="contained"
-                    onClick={onDeleteSelected}
-                    sx={{ backgroundColor: "#c0392b", color: "white", fontWeight: "bold", "&:hover": { backgroundColor: "#a93226" } }}
-                >
-                    - Borrar Seleccionados ({selectedIds.ids.size})
-                </Button>
+            <Box sx={{ marginBottom: 1, display: "flex", justifyContent: "flex-start", gap: 1 }}>
+                {/* Los botones de acción solo aparecen si la toolbar está visible */}
+                {toolbarVisible && (
+                    <>
+                        <Button
+                            variant="contained"
+                            onClick={onAddClick}
+                            sx={{ backgroundColor: "#298d29", color: "white", fontWeight: "bold", "&:hover": { backgroundColor: "#1e6b1e" } }}
+                        >
+                            + Agregar Material
+                        </Button>
+                        <Button
+                            variant="contained"
+                            onClick={onDeleteSelected}
+                            sx={{ backgroundColor: "#c0392b", color: "white", fontWeight: "bold", "&:hover": { backgroundColor: "#a93226" } }}
+                        >
+                            - Borrar Seleccionados ({selectedIds.ids.size})
+                        </Button>
+                    </>
+                )}
+
+                {/* El botón de toggle siempre está visible */}
                 <Button
                     variant="contained"
                     onClick={handleToggleToolbar}
@@ -93,6 +100,10 @@ export const MaterialTableMui = ({
                 pageSizeOptions={[5, 10, 25]}
                 paginationModel={paginationModel}
                 onPaginationModelChange={onPaginationModelChange}
+                paginationMode="server"
+                rowCount={rowCount}
+
+                getRowId={(row) => row?.id || row?.code}
 
                 sortingMode="server"
                 sortModel={sortModel}
