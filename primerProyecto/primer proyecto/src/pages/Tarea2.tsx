@@ -45,7 +45,12 @@ export const Tarea2 = () => {
     // Estados para el CRUD
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [selectedFactory, setSelectedFactory] = useState<Factory | null>(null);
-    const [selectedRowIds, setSelectedRowIds] = useState<GridRowSelectionModel>([]);
+    const [selectedRowIds, setSelectedRowIds] = useState<GridRowSelectionModel>(
+        {
+            type: "include",
+            ids: new Set<any>(),
+        }
+    );
 
     const handleAddClick = () => {
         setSelectedFactory(null);
@@ -63,16 +68,21 @@ export const Tarea2 = () => {
     }
 
     const handleDeleteSelected = async () => {
-        const confirmacion = window.confirm(`¿Seguro que quieres borrar ${selectedRowIds.length} fábricas?`);
+        const confirmacion = window.confirm(`¿Seguro que quieres borrar ${selectedRowIds.ids.size} fábricas?`);
         if (!confirmacion) return;
         try {
             setLoading(true);
-            await Promise.all(selectedRowIds.map(id => deleteFactory(1, Number(id))));
+            await Promise.all(Array.from(selectedRowIds.ids).map(id => deleteFactory(1, Number(id))));
 
             alert("Fábricas borradas correctamente");
 
             await fetchFactories(currentFilters, paginationModel.page, paginationModel.pageSize, sortModel);
-            setSelectedRowIds([]);
+            setSelectedRowIds(
+                {
+                    type: "include",
+                    ids: new Set<any>(),
+                }
+            );
         } catch (error) {
             console.error("Error deleting factories:", error);
         } finally {
@@ -138,14 +148,12 @@ export const Tarea2 = () => {
         // hacemos una búsqueda inicial sin filtros para mostrar todas
         //  las fábricas
         fetchFactories(currentFilters, paginationModel.page, paginationModel.pageSize, sortModel);
-    }, [paginationModel.page, paginationModel.pageSize, sortModel]);
+    }, [currentFilters, paginationModel.page, paginationModel.pageSize, sortModel]);
 
-    const handleFilter = async (filters: FactoryFilterValuesMui) => {
+    const handleFilter = (filters: FactoryFilterValuesMui) => {
         setCurrentFilters(filters);
         // al aplicar un filtro, reseteamos la paginación a la primera página
         setPaginationModel((prev) => ({ ...prev, page: 0 }));
-        fetchFactories(filters, 0, paginationModel.pageSize, sortModel);
-
     }
 
 
@@ -175,7 +183,7 @@ export const Tarea2 = () => {
                 // Manejadores para el CRUD
                 onAddClick={handleAddClick}
                 onEditClick={handleEditClick}
-                onSelectionModelChange={setSelectedRowIds}
+                onSelectionModelChange={(newSelection) => setSelectedRowIds(newSelection)}
                 onDeleteSelected={handleDeleteSelected}
                 selectedIds={selectedRowIds}
             />
