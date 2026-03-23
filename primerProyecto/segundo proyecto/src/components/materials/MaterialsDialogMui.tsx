@@ -4,7 +4,22 @@ import { useState, useEffect } from "react";
 import { Material } from "../../types/materials";
 import { useFormik } from "formik";
 import { getMeasureUnits } from "../../api/measureUnitService";
+import { FilePond, registerPlugin } from 'react-filepond';
+import 'filepond/dist/filepond.min.css';
 
+import FilePondPluginImagePreview from 'filepond-plugin-image-preview';
+import 'filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css';
+
+import FilePondPluginFileValidateType from 'filepond-plugin-file-validate-type';
+import FilePondPluginFileValidateSize from 'filepond-plugin-file-validate-size';
+
+// import { processFileUpload } from "../../api/documentService";
+
+registerPlugin(
+    FilePondPluginImagePreview,
+    FilePondPluginFileValidateType,
+    FilePondPluginFileValidateSize
+);
 
 interface Props {
 
@@ -97,15 +112,18 @@ export const MaterialDialogMui = ({ open, onClose, onSubmit, initialValues }: Pr
                             select
                             name="measureUnitId"
                             label="Unidad de medida"
-                            value={formik.values.measureUnitId}
+                            value={formik.values.measureUnitId || ''}
                             onChange={formik.handleChange}
                             error={formik.touched.measureUnitId && Boolean(formik.errors.measureUnitId)}
                             helperText={formik.touched.measureUnitId && formik.errors.measureUnitId}
                             disabled={loadingUnits}
                         >
+                            <MenuItem value="">
+                                <em>Seleccione una unidad...</em>
+                            </MenuItem>
                             {loadingUnits ? (
-                                <MenuItem disabled> <CircularProgress size={20} />
-                                    ...cargando</MenuItem>
+                                <MenuItem value={formik.values.measureUnitId || ''} disabled> <CircularProgress size={20} />
+                                    cargando...</MenuItem>
                             ) : (
                                 units.map((unit) => (
                                     <MenuItem key={unit.id} value={unit.id}>

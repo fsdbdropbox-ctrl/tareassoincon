@@ -93,18 +93,25 @@ export const MaterialsView = () => {
     const handleSaveMaterial = async (materialData: Partial<Material>) => {
         setLoading(true);
         try {
+
+            const { createAt, modifiedAt, modifiedBy, ...payloadToSave } = materialData as any;
+
             if (materialsToEdit && materialsToEdit.id) {
-                await updateMaterial(materialsToEdit.id, materialData);
+                await updateMaterial(materialsToEdit.id, payloadToSave);
             } else {
-                await createMaterial(materialData);
+                await createMaterial(payloadToSave);
             }
-        } catch (error) {
+
             setIsDialogOpen(false);
+            alert("Material guardado correctamente")
+            fetchMaterialsData();
+
+
+        } catch (error) {
             console.error("Error al guardar el material:", error);
             alert("Hubo un error al guardar el material.");
-        } finally {
-            setLoading(false);
-        }
+        } finally { setLoading(false); }
+
     }
 
     return (

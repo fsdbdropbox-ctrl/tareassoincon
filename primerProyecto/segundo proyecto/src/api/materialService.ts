@@ -104,3 +104,15 @@ export const deleteMaterial = async (materialId: number): Promise<void> => {
     });
     if (!response.ok) throw new Error(`Error deleting material: ${response.statusText}`);
 }
+
+// Get para poblar la tabla de materiales de una localizacion con Nombre real y no Ids
+export const getMaterialById = async (materialId: number): Promise<Material> => {
+    const token = await getValidToken();
+
+    const response = await fetch(`${BASE_URL}/v1/clients/${CLIENT_ID}/materialGenerics/${materialId}`, {
+        method: "GET",
+        headers: { "Authorization": `Bearer ${token}` }
+    });
+    if (!response.ok) throw new Error(`Error al obtener el material ${materialId}`);
+    return response.json();
+}
