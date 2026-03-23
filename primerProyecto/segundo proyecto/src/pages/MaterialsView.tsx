@@ -1,16 +1,23 @@
 import { useState, useEffect, useCallback } from "react";
 import { GridSortModel, GridRowSelectionModel, GridRowId } from "@mui/x-data-grid";
 import { Material, MaterialFilter } from "../types/materials";
-import { searchMaterials, deleteMaterial } from "../api/materialService";
+import { searchMaterials, deleteMaterial, updateMaterial, createMaterial } from "../api/materialService";
 import { MaterialTableMui } from "../components/materials/MaterialTableMui";
 import { Box, Typography } from "@mui/material";
+import { MaterialDialogMui } from "../components/materials/MaterialsDialogMui";
 
 export const MaterialsView = () => {
 
+    // Tabla
     const [materials, setMaterials] = useState<Material[]>([]);
     const [rowCount, setRowCount] = useState(0);
     const [loading, setLoading] = useState(false);
 
+    // Dialog
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [materialsToEdit, setMaterialsToEdit] = useState<Material | null>(null);
+
+    // Paginacion Server
     const [paginationModel, setPaginationModel] = useState({
         page: 0,
         pageSize: 5
@@ -52,9 +59,13 @@ export const MaterialsView = () => {
     };
 
     const handleAddClick = () => {
+        setMaterialsToEdit(null);
+        setIsDialogOpen(true);
     }
 
     const handleEditClick = (material: Material) => {
+        setMaterialsToEdit(material);
+        setIsDialogOpen(true);
     }
 
     const handleDeleteSelected = async () => {
@@ -78,6 +89,24 @@ export const MaterialsView = () => {
         }
     };
 
+
+    const handleSaveMaterial = async (materialData: Partial<Material>) => {
+        setLoading(true);
+        try {
+            if (materialsToEdit && materialsToEdit.id) {
+                await updateMaterial(materialsToEdit.id, materialData);
+            } else {
+                await createMaterial(materialData);
+            }
+        } catch (error) {
+            setIsDialogOpen(false);
+            console.error("Error al guardar el material:", error);
+            alert("Hubo un error al guardar el material.");
+        } finally {
+            setLoading(false);
+        }
+    }
+
     return (
         <Box sx={{ width: "100%", height: "100%" }}>
             <Typography variant="h4">Materiales</Typography>
@@ -94,6 +123,13 @@ export const MaterialsView = () => {
                 onSelectionModelChange={handleSelectionChange}
                 onDeleteSelected={handleDeleteSelected}
                 selectedIds={{ type: "include", ids: selectedRowIds.ids }}
+            />
+
+            <MaterialDialogMui
+                open={isDialogOpen}
+                onClose={() => setIsDialogOpen(false)}
+                onSubmit={(handleSaveMaterial)}
+                initialValues={materialsToEdit}
             />
         </Box>
     );

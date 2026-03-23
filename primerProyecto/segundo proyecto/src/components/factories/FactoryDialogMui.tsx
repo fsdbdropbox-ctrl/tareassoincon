@@ -1,4 +1,4 @@
-import { Factory } from "../../../types/factory";
+import { Factory } from "../../types/factory";
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField } from "@mui/material";
 import { useState, useEffect } from "react";
 import * as Yup from "yup";
