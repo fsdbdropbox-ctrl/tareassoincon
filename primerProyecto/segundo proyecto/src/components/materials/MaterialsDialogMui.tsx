@@ -12,6 +12,7 @@ import 'filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css';
 
 import FilePondPluginFileValidateType from 'filepond-plugin-file-validate-type';
 import FilePondPluginFileValidateSize from 'filepond-plugin-file-validate-size';
+import { processFileUpload } from "../../api/documentService";
 
 // import { processFileUpload } from "../../api/documentService";
 
@@ -34,7 +35,8 @@ export const MaterialDialogMui = ({ open, onClose, onSubmit, initialValues }: Pr
 
     const [units, setUnits] = useState<{ id: number, name: string }[]>([]);
     const [loadingUnits, setLoadingUnits] = useState(false);
-
+    //filepond
+    const [files, setFiles] = useState<any[]>([]);
 
     useEffect(() => {
 
@@ -44,6 +46,8 @@ export const MaterialDialogMui = ({ open, onClose, onSubmit, initialValues }: Pr
             getMeasureUnits(1)
                 .then(data => setUnits(data))
                 .finally(() => setLoadingUnits(false))
+            // limpiamos la vista de FilePond al abrir un nuevo diálogo
+            setFiles([]);
         }
     }, [open]);
 
@@ -80,6 +84,34 @@ export const MaterialDialogMui = ({ open, onClose, onSubmit, initialValues }: Pr
             <form onSubmit={formik.handleSubmit}>
                 <DialogContent>
                     <Box>
+                        <Box sx={{ fontWeight: 'bold', mb: 1, color: '#555' }}>Imagen del Material</Box>
+                        <FilePond
+                            files={files}
+                            onupdatefiles={setFiles}
+                            allowMultiple={false}
+                            maxFiles={1}
+                            name="file"
+                            labelIdle='Arrastra tu imagen o <span class="filepond--label-action">Insertar</span>'
+                            acceptedFileTypes={['image/jpeg', 'image/png', 'image/webp']}
+                            allowFileSizeValidation={true}
+                            maxFileSize="5MB"
+
+                            server={{
+                                process: processFileUpload,
+
+                                revert: (uniqueFileId, load, error) => {
+                                    formik.setFieldValue("imageUuid", null);
+                                    load();
+                                }
+
+                            }}
+
+                            onprocessfile={(error, file) => {
+                                if (!error) {
+                                    formik.setFieldValue("imageUudi", file.serverId);
+                                }
+                            }}
+                        />
                         <TextField
                             fullWidth
                             name="code"

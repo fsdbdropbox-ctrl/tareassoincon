@@ -2,6 +2,8 @@ import { Material } from "../../types/materials";
 import { DataGrid, GridColDef, GridSortModel, GridRowSelectionModel, GridToolbarContainer, GridToolbarExport, GridToolbarFilterButton } from "@mui/x-data-grid";
 import { Box, Button } from "@mui/material";
 import { useState } from "react";
+import { SecureImage } from "../common/SecureImage";
+import { useParams } from "react-router-dom";
 
 interface MaterialTableProps {
     materials: Material[];
@@ -36,6 +38,22 @@ export const MaterialTableMui = ({
     selectedIds
 }: MaterialTableProps) => {
     const columns: GridColDef[] = [
+        {
+            field: "imageUuid",
+            headerName: "Img",
+            width: 70,
+            sortable: false,
+            filterable: false,
+            align: "center",
+            renderCell: (params) => (
+                <SecureImage
+                    imageId={params.row.imageUuid}
+                    alt={params.row.name}
+                    width={40}
+                    height={40}
+                />
+            )
+        },
         { field: "code", headerName: "Código", flex: 1, align: "center", headerAlign: "center" },
         { field: "name", headerName: "Nombre", flex: 1, align: "center", headerAlign: "center" },
         { field: "externalCode", headerName: "Código Externo", flex: 1, align: "center", headerAlign: "center" },
