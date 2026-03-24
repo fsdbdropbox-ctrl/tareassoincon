@@ -58,6 +58,7 @@ export const searchMaterials = async (
 // y devuelve el material
 export const createMaterial = async (materialData: Partial<Material>): Promise<Material> => {
     const token = await getValidToken();
+
     const fullMaterialData = {
         ...materialData,
         clientId: CLIENT_ID,

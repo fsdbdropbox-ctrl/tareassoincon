@@ -5,6 +5,8 @@ import { searchMaterials, deleteMaterial, updateMaterial, createMaterial } from 
 import { MaterialTableMui } from "../components/materials/MaterialTableMui";
 import { Box, Typography } from "@mui/material";
 import { MaterialDialogMui } from "../components/materials/MaterialsDialogMui";
+import { preloadImagesIntoCache } from "../api/documentService";
+
 
 export const MaterialsView = () => {
 
@@ -42,6 +44,10 @@ export const MaterialsView = () => {
             );
             setMaterials(materials);
             setRowCount(total);
+
+            const uuidsToFetch = materials.map((m) => m.imageUuid);
+
+            preloadImagesIntoCache(uuidsToFetch);
         } catch (error) {
             console.error("Error al cargar los materiales:", error);
         } finally {
@@ -92,12 +98,16 @@ export const MaterialsView = () => {
 
     const handleSaveMaterial = async (materialData: Partial<Material>) => {
         setLoading(true);
+
         try {
 
             const { createAt, modifiedAt, modifiedBy, ...payloadToSave } = materialData as any;
+            console.log("payloadToSave", payloadToSave);
+            console.log("imageUuid payload", payloadToSave.imageUuid);
 
             if (materialsToEdit && materialsToEdit.id) {
                 await updateMaterial(materialsToEdit.id, payloadToSave);
+
             } else {
                 await createMaterial(payloadToSave);
             }

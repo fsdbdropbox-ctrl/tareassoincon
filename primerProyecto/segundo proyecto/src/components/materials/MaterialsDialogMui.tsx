@@ -92,7 +92,7 @@ export const MaterialDialogMui = ({ open, onClose, onSubmit, initialValues }: Pr
                             maxFiles={1}
                             name="file"
                             labelIdle='Arrastra tu imagen o <span class="filepond--label-action">Insertar</span>'
-                            acceptedFileTypes={['image/jpeg', 'image/png', 'image/webp']}
+                            acceptedFileTypes={['image/jpeg', 'image/png', 'image/webp', 'image/jpg']}
                             allowFileSizeValidation={true}
                             maxFileSize="5MB"
 
@@ -108,7 +108,7 @@ export const MaterialDialogMui = ({ open, onClose, onSubmit, initialValues }: Pr
 
                             onprocessfile={(error, file) => {
                                 if (!error) {
-                                    formik.setFieldValue("imageUudi", file.serverId);
+                                    formik.setFieldValue("imageUuid", file.serverId);
                                 }
                             }}
                         />

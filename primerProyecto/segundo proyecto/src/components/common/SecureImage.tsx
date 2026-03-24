@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { CircularProgress, Box } from "@mui/material";
-import { downloadImage } from "../../api/documentService";
+import { fetchImagePreview } from "../../api/documentService";
 
 interface Props {
+
     imageId?: string | number | null;
     alt?: string;
     width?: number;
@@ -18,12 +19,11 @@ export const SecureImage = ({ imageId, alt, width = 50, height = 50 }: Props) =>
 
     useEffect(() => {
         if (!imageId) return;
-
         let isMounted = true;
         setLoading(true);
         setError(false);
 
-        downloadImage(imageId.toString())
+        fetchImagePreview(imageId.toString())
             .then((url) => {
                 if (isMounted) setImageUrl(url);
             })
@@ -34,14 +34,17 @@ export const SecureImage = ({ imageId, alt, width = 50, height = 50 }: Props) =>
                 if (isMounted) setLoading(false);
             });
 
+
         return () => {
             isMounted = false;
 
             if (imageUrl) URL.revokeObjectURL(imageUrl);
         };
+
     }, [imageId]);
 
     if (!imageId) {
+
         return <Box sx={{ width, height, bgcolor: '#f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 1, fontSize: '0.6rem', color: 'gray' }}>Sin img</Box>;
     }
 

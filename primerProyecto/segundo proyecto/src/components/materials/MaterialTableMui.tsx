@@ -5,6 +5,7 @@ import { useState } from "react";
 import { SecureImage } from "../common/SecureImage";
 import { useParams } from "react-router-dom";
 
+
 interface MaterialTableProps {
     materials: Material[];
     rowCount: number;
@@ -22,6 +23,7 @@ interface MaterialTableProps {
     onDeleteSelected: () => void;
     selectedIds: GridRowSelectionModel;
 }
+
 
 export const MaterialTableMui = ({
     materials,

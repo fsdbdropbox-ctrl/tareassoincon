@@ -15,46 +15,42 @@ export const processFileUpload = (
     // controlador para cancelar una subida
     const controller = new AbortController();
 
-    // extraemos el nombre y la extension para la URL
-    const extension = file.name.split(".").pop() || "png";
+    // extraemos el nombre sin la extension para la URL
     const nameWithoutExt = file.name.substring(0, file.name.lastIndexOf(".")) || "imagen";
 
     // parámetros necesarios para la subida según el swagger
     const params = new URLSearchParams({
         name: nameWithoutExt,
-        typeDoc: extension,
         idVersion: "1",
-        idUser: "1",
-        versionStatus: "1",
-        reason: "1",
+        pathbase: "Emisuite/My Factory/materials"
+
     });
 
     getValidToken().then(token => {
         const formData = new FormData();
-        formData.append(fieldName, file, file.name);
-
-        fetch(`${BASE_URL_DOCS}/file/uploadFile?${params.toString()}`, {
+        formData.append("file", file, file.name);
+        fetch(`${BASE_URL_DOCS}/file/createDocument?${params.toString()}`, {
             method: "POST",
             headers: {
-                "Authorization": `Bearer ${token}`
+                "Authorization": `Bearer ${token}`,
+                "Accept": "application/json"
             },
             body: formData,
             signal: controller.signal
         }).then(response => {
             if (!response.ok) { throw new Error("Error en el servidor: " + response.status); }
             return response.json();
-        })
-            .then(data => {
-                const serverId = data.idDocument?.toString();
-                if (serverId) { load(serverId) }
-                else { error("El servidor respondió pero no mandó Id del documento") }
-            }).catch(err => {
-                if (err.name !== 'AborError') {
-                    console.error("Error subiendo archivo: " + err)
-                    error(err.message);
-                }
+        }).then(data => {
+            const serverId = data.uuidDocument?.toString();
+            if (serverId) { load(serverId) }
+            else { error("El servidor respondió pero no mandó Id del documento") }
+        }).catch(err => {
+            if (err.name !== 'AbortError') {
+                console.error("Error subiendo archivo: " + err)
+                error(err.message);
+            }
 
-            });
+        });
     }).catch(() => {
         error("Error de autenticación");
     })
@@ -69,24 +65,130 @@ export const processFileUpload = (
     };
 };
 
+const imageCache: Record<string, Promise<string>> = {};
+const uuidRegex = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/i;
 
-export const downloadImage = async (
-    idDocument: string,
-    idVersion: string = "1"
+export const fetchImagePreview = (
+    imageUuid: string,
 ): Promise<string> => {
-    const token = await getValidToken();
 
-    const response = await fetch(`${BASE_URL_DOCS}/file/downloadFile/${idDocument}/${idVersion}`, {
-        method: "GET",
-        headers: {
-            "Authorization": `Bearer ${token}`,
-            "Accept": "application/octet-stream"
-        }
-    });
-    if (!response.ok) {
-        throw new Error("No se pudo cargar la imagen")
+    if (!imageUuid || imageUuid === "null" || imageUuid === "undefined") { return Promise.reject("Sin imagen") };
+
+    if (!uuidRegex.test(imageUuid.toString())) {
+        return Promise.reject("Id antiguo");
     }
-    const blob = await response.blob();
 
-    return URL.createObjectURL(blob);
+    if (imageUuid in imageCache) {
+        return imageCache[imageUuid];
+    }
+    const fetchPromise = (async () => {
+        const token = await getValidToken();
+
+        const requestBody = {
+            filter: {
+                ids: [imageUuid],
+                includeData: true,
+                quality: "LOW",
+            },
+            page: 0,
+            size: 1
+        };
+
+        const response = await fetch(`${BASE_URL_DOCS}/file/searchImages`, {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            },
+            body: JSON.stringify(requestBody)
+        });
+        if (!response.ok) { throw new Error("Error al buscar la imagen") }
+        const data = await response.json();
+
+        if (data && data.length > 0) {
+            const imageInfo = data[0];
+            return `data:${imageInfo.mimeType};base64,${imageInfo.fileData}`;
+        } else {
+            throw new Error("Imagen no encontrada en el servidor");
+        }
+    })();
+
+    imageCache[imageUuid] = fetchPromise;
+
+    fetchPromise.catch(() => {
+        delete imageCache[imageUuid];
+    })
+    return fetchPromise;
+
+}
+
+
+export const preloadImagesIntoCache = (imagesUuids: (string | undefined)[]) => {
+
+    const validUuids = [...new Set(imagesUuids)].filter(
+        (id): id is string =>
+            !!id &&
+            id !== "null" &&
+            id !== "undefined" &&
+            uuidRegex.test(id.toString()) &&
+            !(id in imageCache)
+    );
+
+    if (validUuids.length === 0) return;
+
+    const batchPromise = (async () => {
+        const token = await getValidToken();
+
+        const requestBody = {
+            filter: {
+                ids: validUuids,
+                includeData: true,
+                quality: "LOW",
+            },
+            page: 0,
+            size: validUuids.length
+        };
+
+        const response = await fetch(`${BASE_URL_DOCS}/file/searchImages`, {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            },
+            body: JSON.stringify(requestBody)
+        });
+
+        if (!response.ok) {
+            throw new Error("Error al hacer la petición masiva");
+        }
+        const data = await response.json();
+
+        const resultMap: Record<string, string> = {};
+        if (Array.isArray(data)) {
+            data.forEach((img: any) => {
+                if (img.fileData) {
+                    resultMap[img.id] = `data:${img.mimeType};base64,${img.fileData}`;
+                }
+            });
+
+        }
+        return resultMap;
+    })();
+
+    validUuids.forEach(uuid => {
+        imageCache[uuid] = batchPromise.then(resultMap => {
+            if (resultMap[uuid]) {
+                return resultMap[uuid];
+            } else {
+                throw new Error("El servidor no devolvió esta imagen en el bloque de uuids");
+            }
+        }).catch(err => {
+            delete imageCache[uuid];
+            throw err;
+        })
+    })
+
+
 }
