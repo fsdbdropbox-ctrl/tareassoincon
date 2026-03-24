@@ -3,6 +3,7 @@ export interface MasterLocation {
     name: string;
     code: string;
     description: string | null;
+    imageUuid?: string | null;
     allowStorage: boolean;
     allowOtherMaterials: boolean;
     allowMaterialRequests: boolean;

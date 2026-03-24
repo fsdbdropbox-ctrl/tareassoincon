@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { getMasterLocations } from "../api/locationService";
 import { MasterLocation } from "../types/MasterLocations";
 import { MasterLocationsTableMui } from "../components/locations/MasterLocationsTableMui";
+import { preloadImagesIntoCache } from "../api/documentService";
 
 export const LocationView = () => {
     const navigate = useNavigate();
@@ -16,6 +17,10 @@ export const LocationView = () => {
             try {
                 const data = await getMasterLocations();
                 setLocations(data);
+
+                const uuidsToFetch = data.map((loc) => loc.imageUuid);
+
+                preloadImagesIntoCache(uuidsToFetch);
             } catch (error) {
                 console.error("Error cargando localizaciones maestras:", error);
             } finally {

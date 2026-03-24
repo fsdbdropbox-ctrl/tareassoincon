@@ -1,6 +1,7 @@
 import { DataGrid, GridColDef, GridRowSelectionModel } from "@mui/x-data-grid";
 import { Box, Button } from "@mui/material";
 import { LocationMaterial } from "../../types/locations";
+import { SecureImage } from "../common/SecureImage";
 
 interface Props {
     data: LocationMaterial[];
@@ -16,6 +17,21 @@ interface Props {
 export const LocationMaterialsTableMui = ({ data, loading, onAddClick, onEditClick, onSelectionChange, onDeleteSelected, selectedIds }: Props) => {
 
     const columns: GridColDef[] = [
+        {
+            field: "imageUuid",
+            headerName: "Img",
+            sortable: false,
+            filterable: false,
+            align: "center",
+            renderCell: (params) => (
+                <SecureImage
+                    imageId={params.row.imageUuid}
+                    alt={params.row.name}
+                    width={40}
+                    height={40}
+                />
+            )
+        },
         { field: "materialId", headerName: "Id del Material", width: 120, align: "center", headerAlign: "center" },
         { field: "materialName", headerName: "Nombre del Material", flex: 1, align: "center", headerAlign: "center" },
         { field: "externalCode", headerName: "Cód. Externo", flex: 1, align: "center", headerAlign: "center" },
