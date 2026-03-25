@@ -18,6 +18,9 @@ export const searchMaterials = async (
 ): Promise<{ materials: Material[], total: number }> => {
     const token = await getValidToken();
     try {
+        const cleanedFilters = Object.fromEntries(
+            Object.entries(filters).filter(([_, value]) => value !== "")
+        );
         // Ajustamos la URL a la estructura real: /v1/clients/{id}/materialGenerics/search
         let url = `${BASE_URL}/v1/clients/${CLIENT_ID}/materialGenerics/search?page=${page}&size=${pageSize}`;
 
@@ -33,7 +36,7 @@ export const searchMaterials = async (
                 "Content-Type": "application/json",
                 "Authorization": `Bearer ${token}`
             },
-            body: JSON.stringify(filters)
+            body: JSON.stringify(cleanedFilters)
         });
 
         if (!response.ok) {

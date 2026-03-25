@@ -1,7 +1,7 @@
 import { DataGrid, GridColDef, GridRowSelectionModel } from "@mui/x-data-grid";
 import { Box, Button } from "@mui/material";
 import { LocationMaterial } from "../../types/locations";
-import { SecureImage } from "../common/SecureImage";
+import { SecureImage } from "../common/images/SecureImage";
 
 interface Props {
     data: LocationMaterial[];

@@ -2,7 +2,7 @@ import { Material } from "../../types/materials";
 import { DataGrid, GridColDef, GridSortModel, GridRowSelectionModel, GridToolbarContainer, GridToolbarExport, GridToolbarFilterButton } from "@mui/x-data-grid";
 import { Box, Button } from "@mui/material";
 import { useState } from "react";
-import { SecureImage } from "../common/SecureImage";
+import { SecureImage } from "../common/images/SecureImage";
 import { useParams } from "react-router-dom";
 
 

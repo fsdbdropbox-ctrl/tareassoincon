@@ -1,14 +1,17 @@
 import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Box, Typography, Button } from "@mui/material";
-import { GridRowSelectionModel } from "@mui/x-data-grid";
+import { GridRowSelectionModel, GridRowId } from "@mui/x-data-grid";
 import { LocationMaterial } from "../types/locations";
 import { getLocationMaterials, deleteLocationMaterial } from "../api/locationService";
 import { LocationMaterialsTableMui } from "../components/locations/LocationMaterialsTableMui";
 import { getMaterialById } from "../api/materialService";
 import { addMaterialToLocation, updateLocationMaterial } from "../api/locationService";
 import { LocationMaterialDialogMui } from "../components/locations/LocationMaterialDialogMui";
-
+import { getLocationById } from "../api/locationService";
+import { MasterLocation } from "../types/MasterLocations";
+import { useMemo } from "react";
+import { preloadImagesIntoCache } from "../api/documentService";
 
 export const LocationMaterials = () => {
     const { id } = useParams();
@@ -16,18 +19,31 @@ export const LocationMaterials = () => {
     const selectedLocationId = Number(id);
 
     const [materials, setMaterials] = useState<LocationMaterial[]>([]);
-    const [loading, setLoading] = useState(false);
-    const [selectedIds, setSelectedIds] = useState<GridRowSelectionModel>({ type: "include", ids: new Set<any>() });
 
+    const [locationDetail, setLocationDetail] = useState<MasterLocation | null>(null);
+
+    const [loading, setLoading] = useState(false);
+
+    const [selectedIds, setSelectedIds] = useState<{ ids: Set<GridRowId> }>({
+        ids: new Set<GridRowId>()
+    });
 
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [itemToEdit, setItemToEdit] = useState<LocationMaterial | null>(null);
 
 
+    const handleSelectionChange = (newSelection: GridRowSelectionModel) => {
+        setSelectedIds({ ids: new Set((newSelection as any).ids) })
+    }
+
     const fetchLocationData = useCallback(async () => {
         if (!selectedLocationId) return;
         setLoading(true);
         try {
+
+            const loc = await getLocationById(selectedLocationId);
+            setLocationDetail(loc);
+
             const data = await getLocationMaterials(selectedLocationId);
             const uniqueMaterialIds = Array.from(new Set(data.map(item => item.materialId)));
 
@@ -57,9 +73,16 @@ export const LocationMaterials = () => {
                     isSemifinished: materialInfo ? materialInfo.isSemifinished : false,
                     isFinished: materialInfo ? materialInfo.isFinished : false,
                     isVirtual: materialInfo ? materialInfo.isVirtual : false,
+
+                    imageUuid: materialInfo ? materialInfo.imageUuid : null,
                 };
             });
+            const uuidsToFetch = detailedMaterialsData.map((m) => m.imageUuid).filter((uuid) => uuid && uuid.trim() !== "");
+            if (uuidsToFetch.length > 0) {
+                preloadImagesIntoCache(uuidsToFetch);
+            }
             setMaterials(detailedMaterialsData as any);
+
         } catch (error) {
             console.error(`Error cargando materiales: `, error);
         } finally {
@@ -77,7 +100,6 @@ export const LocationMaterials = () => {
         setLoading(true);
         try {
             await Promise.all(Array.from(selectedIds.ids).map(delId => deleteLocationMaterial(Number(delId))));
-            setSelectedIds({ type: "include", ids: new Set<any>() });
             fetchLocationData();
         } catch (error) {
             alert("Error al eliminar");
@@ -138,15 +160,18 @@ export const LocationMaterials = () => {
                 <Button variant="outlined" onClick={() => navigate("/locations")}>
                     ← Volver
                 </Button>
-                <Typography variant="h6" sx={{ fontWeight: "bold", color: "#8c633d" }}>
-                    Localización ID: {selectedLocationId}
+                <Typography variant="h6" sx={{ fontWeight: "bold", color: "#3f51b5" }}>
+                    Localización: {locationDetail?.name || "Cargando..."}
+                </Typography>
+                <Typography variant="body2" color="textSecondary">
+                    Código: {locationDetail?.code || "---"} | ID: {selectedLocationId}
                 </Typography>
             </Box>
 
             <LocationMaterialsTableMui
                 data={materials}
                 loading={loading}
-                selectedIds={selectedIds}
+                selectedIds={{ type: "include", ids: selectedIds.ids }}
                 onSelectionChange={setSelectedIds}
                 onAddClick={handleAddClick}
                 onDeleteSelected={handleDeleteSelected}

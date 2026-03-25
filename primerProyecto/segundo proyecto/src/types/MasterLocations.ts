@@ -2,6 +2,7 @@ export interface MasterLocation {
     id: number;
     name: string;
     code: string;
+    externalCode: string;
     description: string | null;
     imageUuid?: string | null;
     allowStorage: boolean;

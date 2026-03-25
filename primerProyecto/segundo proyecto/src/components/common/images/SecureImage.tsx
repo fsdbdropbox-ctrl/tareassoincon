@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { CircularProgress, Box } from "@mui/material";
-import { fetchImagePreview } from "../../api/documentService";
+import { fetchImagePreview } from "../../../api/documentService";
 
 interface Props {
 

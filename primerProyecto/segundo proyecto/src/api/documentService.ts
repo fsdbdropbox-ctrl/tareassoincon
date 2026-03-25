@@ -124,7 +124,7 @@ export const fetchImagePreview = (
 }
 
 
-export const preloadImagesIntoCache = (imagesUuids: (string | undefined)[]) => {
+export const preloadImagesIntoCache = (imagesUuids: (string | null | undefined)[]) => {
 
     const validUuids = [...new Set(imagesUuids)].filter(
         (id): id is string =>

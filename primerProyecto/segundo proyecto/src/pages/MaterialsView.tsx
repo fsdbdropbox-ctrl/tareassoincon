@@ -6,6 +6,7 @@ import { MaterialTableMui } from "../components/materials/MaterialTableMui";
 import { Box, Typography } from "@mui/material";
 import { MaterialDialogMui } from "../components/materials/MaterialsDialogMui";
 import { preloadImagesIntoCache } from "../api/documentService";
+import { GeneralFilter, GeneralFilterValues } from "../components/common/filters/GeneralFilter";
 
 
 export const MaterialsView = () => {
@@ -31,29 +32,51 @@ export const MaterialsView = () => {
         ids: new Set<GridRowId>()
     });
 
-    const currentFilters: MaterialFilter = {}
+    const [currentFilters, setCurrentFilters] = useState<GeneralFilterValues>({
+        code: "",
+        name: "",
+        externalCode: "",
+        description: ""
+    });
+
+    const handleApplyFilters = (values: GeneralFilterValues) => {
+        setCurrentFilters(values);
+        setPaginationModel((prev) => ({ ...prev, page: 0 }))
+    }
+
 
     const fetchMaterialsData = useCallback(async () => {
         setLoading(true);
         try {
+            const apiFilters: MaterialFilter = {
+                code: currentFilters.code,
+                name: currentFilters.name,
+                description: currentFilters.description,
+                externalCode: currentFilters.externalCode
+            }
+
             const { materials, total } = await searchMaterials(
-                currentFilters,
+                apiFilters,
                 paginationModel.page,
                 paginationModel.pageSize,
                 sortModel
             );
+
+
+            const uuidsToFetch = materials
+                .map((item) => item.imageUuid)
+                .filter((uuid) => uuid && uuid.trim() !== "");
+            if (uuidsToFetch.length > 0) {
+                preloadImagesIntoCache(uuidsToFetch);
+            }
             setMaterials(materials);
             setRowCount(total);
-
-            const uuidsToFetch = materials.map((m) => m.imageUuid);
-
-            preloadImagesIntoCache(uuidsToFetch);
         } catch (error) {
             console.error("Error al cargar los materiales:", error);
         } finally {
             setLoading(false);
         }
-    }, [paginationModel.page, paginationModel.pageSize, sortModel]);
+    }, [paginationModel.page, paginationModel.pageSize, currentFilters, sortModel]);
 
     useEffect(() => {
         fetchMaterialsData();
@@ -102,8 +125,6 @@ export const MaterialsView = () => {
         try {
 
             const { createAt, modifiedAt, modifiedBy, ...payloadToSave } = materialData as any;
-            console.log("payloadToSave", payloadToSave);
-            console.log("imageUuid payload", payloadToSave.imageUuid);
 
             if (materialsToEdit && materialsToEdit.id) {
                 await updateMaterial(materialsToEdit.id, payloadToSave);
@@ -127,6 +148,7 @@ export const MaterialsView = () => {
     return (
         <Box sx={{ width: "100%", height: "100%" }}>
             <Typography variant="h4">Materiales</Typography>
+            <GeneralFilter onFilter={handleApplyFilters} />
             <MaterialTableMui
                 materials={materials}
                 rowCount={rowCount}

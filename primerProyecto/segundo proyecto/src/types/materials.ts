@@ -34,6 +34,7 @@ export interface MaterialFilter {
     name?: string;
     custom?: string;
     description?: string;
+    externalCode?: string;
     isVirtual?: boolean;
     familyIds?: number[];
     isRawMaterial?: boolean;
