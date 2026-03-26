@@ -7,7 +7,7 @@ import { Box, Typography } from "@mui/material";
 import { MaterialDialogMui } from "../components/materials/MaterialsDialogMui";
 import { preloadImagesIntoCache } from "../api/documentService";
 import { GeneralFilter, GeneralFilterValues } from "../components/common/filters/GeneralFilter";
-
+import { useStompoStock } from "../hooks/useStompStock";
 
 export const MaterialsView = () => {
 
@@ -38,6 +38,8 @@ export const MaterialsView = () => {
         externalCode: "",
         description: ""
     });
+
+    const stockMap = useStompoStock('/exchange/topic/updateui')
 
     const handleApplyFilters = (values: GeneralFilterValues) => {
         setCurrentFilters(values);
@@ -162,6 +164,7 @@ export const MaterialsView = () => {
                 onSelectionModelChange={handleSelectionChange}
                 onDeleteSelected={handleDeleteSelected}
                 selectedIds={{ type: "include", ids: selectedRowIds.ids }}
+                stockMap={stockMap}
             />
 
             <MaterialDialogMui

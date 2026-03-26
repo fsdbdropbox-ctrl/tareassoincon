@@ -4,6 +4,7 @@ import { Box, Button } from "@mui/material";
 import { useState } from "react";
 import { SecureImage } from "../common/images/SecureImage";
 import { useParams } from "react-router-dom";
+import { LiveTvSharp } from "@mui/icons-material";
 
 
 interface MaterialTableProps {
@@ -22,6 +23,8 @@ interface MaterialTableProps {
     onSelectionModelChange: (selectedIds: GridRowSelectionModel) => void;
     onDeleteSelected: () => void;
     selectedIds: GridRowSelectionModel;
+    stockMap: Record<number, number>;
+
 }
 
 
@@ -37,7 +40,8 @@ export const MaterialTableMui = ({
     onEditClick,
     onSelectionModelChange,
     onDeleteSelected,
-    selectedIds
+    selectedIds,
+    stockMap
 }: MaterialTableProps) => {
     const columns: GridColDef[] = [
         {
@@ -74,7 +78,28 @@ export const MaterialTableMui = ({
                 return "Otro";
             }
         },
-        { field: "observations", headerName: "Observaciones", flex: 1, align: "center", headerAlign: "center" }
+        { field: "observations", headerName: "Observaciones", flex: 1, align: "center", headerAlign: "center" },
+        {
+            field: "stock",
+            headerName: "Stock Físico",
+            flex: 1,
+            align: "center",
+            headerAlign: "center",
+            renderCell: (params) => {
+                const liveStock = stockMap[params.row.id];
+                const displayStock = liveStock !== undefined ? liveStock : 0;
+                return (
+                    <Box sx={{
+                        fontWeight: 'bold',
+                        color: displayStock > 0 ? '#298d29' : '#c0392b' // Verde si hay, rojo si es 0
+                    }}>
+                        {displayStock}
+
+                    </Box>
+                )
+            }
+
+        }
     ];
 
     const [toolbarVisible, setToolbarVisible] = useState(false);
