@@ -39,7 +39,7 @@ export const MaterialsView = () => {
         description: ""
     });
 
-    const stockMap = useStompoStock('/exchange/topic/updateui')
+    const stockMap = useStompoStock('/topic/updateui')
 
     const handleApplyFilters = (values: GeneralFilterValues) => {
         setCurrentFilters(values);
