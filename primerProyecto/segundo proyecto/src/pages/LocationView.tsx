@@ -8,9 +8,11 @@ import { preloadImagesIntoCache } from "../api/documentService";
 import { GeneralFilter, GeneralFilterValues } from "../components/common/filters/GeneralFilter";
 import { GridRowSelectionModel, GridRowId } from "@mui/x-data-grid";
 import { LocationDialogMui } from "../components/locations/LocationDialogMui";
-
+import { useTranslation } from "react-i18next";
 
 export const LocationView = () => {
+    const { t } = useTranslation();
+
     const navigate = useNavigate();
     const [locations, setLocations] = useState<MasterLocation[]>([]);
     const [loading, setLoading] = useState(false);
@@ -41,18 +43,17 @@ export const LocationView = () => {
                     ...values
                 };
                 await updateLocation(locationToEdit.id, payloadToUpdate);
-                alert("Localización actualizada correctamente");
-
+                alert(t('common.alerts.save_success'));
             } else {
 
                 await createLocation(values);
-                alert("Localización creada correctamente");
+                alert(t('common.alerts.save_success'));
             }
             setIsDialogOpen(false);
             fetchMasterData();
         } catch (error) {
             console.error("Error guardando localización:", error);
-            alert("Hubo un error al crear la localización. Revisa los datos.");
+            alert(t('common.alerts.save_error'));
         } finally {
             setLoading(false);
         }
@@ -81,19 +82,18 @@ export const LocationView = () => {
     };
 
     const handleDeleteSelected = async () => {
-        const confirmacion = window.confirm(`Seguro que quieres eliminar ${selectedRowIds.ids.size} localizaciones?`)
+        const confirmacion = window.confirm(t('common.alerts.delete_confirm_count', { count: selectedRowIds.ids.size }))
         if (!confirmacion) {
             return;
         }
         setLoading(true);
         try {
             await Promise.all(Array.from(selectedRowIds.ids).map(id => deleteLocation(Number(id))));
-            alert("Localizaciones borradas correctamente")
+            alert(t('common.alerts.delete_success'));
             setSelectedRowIds({ ids: new Set<GridRowId>() })
             fetchMasterData();
         } catch (error) {
-            console.error("Error al borrar", error);
-            alert("Error al borrar")
+            alert(t('common.alerts.delete_error'));
         } finally {
             setLoading(false);
         }
@@ -143,9 +143,8 @@ export const LocationView = () => {
 
     return (
         <Box sx={{ width: "100%", height: "100%" }}>
-            <Typography variant="h4">Localizaciones</Typography>
-            <Button variant="contained" color="primary" onClick={handleAddClick} sx={{ mb: 2, mt: 1 }}>
-                + Nueva Localización
+            <Typography variant="h4">{t('locations.view_title')}</Typography>            <Button variant="contained" color="primary" onClick={handleAddClick} sx={{ mb: 2, mt: 1 }}>
+                {t('locations.add_button')}
             </Button>
             <GeneralFilter onFilter={handleApplyFilters} />
             <MasterLocationsTableMui

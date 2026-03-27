@@ -5,6 +5,7 @@ import { useFormik } from "formik";
 import { Material } from "../../types/materials";
 import { LocationMaterial } from "../../types/locations";
 import { searchMaterials } from "../../api/materialService";
+import { SecureImage } from "../common/images/SecureImage";
 
 interface Props {
     open: boolean,
@@ -78,6 +79,17 @@ export const LocationMaterialDialogMui = ({ open, onClose, onSubmit, initialValu
                                 />
                             )}
                         />
+                        {selectedMaterial && selectedMaterial.imageUuid && (
+                            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1, p: 2, border: '1px dashed #ccc', borderRadius: 1, bgcolor: '#fafafa' }}>
+                                <SecureImage
+                                    imageId={selectedMaterial.imageUuid}
+                                    alt={selectedMaterial.name}
+                                    width={100}
+                                    height={100}
+                                    clickable
+                                />
+                            </Box>
+                        )}
 
                         <TextField
                             fullWidth

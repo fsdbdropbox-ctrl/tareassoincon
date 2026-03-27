@@ -2,7 +2,7 @@ import {
     Dialog, DialogTitle, DialogContent, DialogActions,
     Button, TextField, Box, FormControlLabel, Checkbox, Switch, Typography
 } from "@mui/material";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import * as Yup from "yup";
 import { useFormik } from "formik";
 import { MasterLocation } from "../../types/MasterLocations";
@@ -11,8 +11,9 @@ import { FilePond, registerPlugin } from 'react-filepond';
 import 'filepond/dist/filepond.min.css';
 import FilePondPluginImagePreview from 'filepond-plugin-image-preview';
 import 'filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css';
-import { processFileUpload } from "../../api/documentService";
+import { SecureImage } from "../common/images/SecureImage";
 
+import { deleteDocument, processFileUpload } from "../../api/documentService";
 
 registerPlugin(FilePondPluginImagePreview);
 
@@ -60,6 +61,29 @@ export const LocationDialogMui = ({ open, onClose, onSave, locationToEdit }: Loc
         }
     }, [open, locationToEdit]);
 
+
+    const [isDeletingImg, setIsDeletingImg] = useState(false);
+    const handleDeleteImage = async () => {
+        const uuid = formik.values.imageUuid;
+        if (!uuid) {
+            return;
+        }
+
+        const confirm = window.confirm("¿Seguro que quieres borrar la imagen de la base de datos?")
+        if (!confirm) return;
+
+        setIsDeletingImg(true);
+        try {
+            await deleteDocument(uuid.toString());
+            formik.setFieldValue("imageUuid", "");
+        } catch (error) {
+            console.error("Error al borrar la imagen: " + error);
+            alert("Hubo un error al intentar borrar la imagen del servidor")
+        } finally {
+            setIsDeletingImg(false);
+        }
+    }
+
     return (
         <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
             <DialogTitle sx={{ backgroundColor: "#1b6e1b", color: "white" }}>
@@ -74,25 +98,50 @@ export const LocationDialogMui = ({ open, onClose, onSave, locationToEdit }: Loc
                             <Typography variant="subtitle2" gutterBottom>
                                 {locationToEdit?.imageUuid ? "Sustituir Imagen Actual" : "Subir Imagen de la Localización"}
                             </Typography>
-                            <FilePond
-                                allowMultiple={false}
-                                maxFiles={1}
-                                name="file"
-                                labelIdle='Arrastra tu imagen o <span class="filepond--label-action">Examina</span>'
-                                server={{
-                                    process: (fieldName, file, metadata, load, error, progress, abort) => {
-                                        return processFileUpload(fieldName, file, metadata, load, error, progress, abort);
-                                    }
-                                }}
-                                onprocessfile={(error, file) => {
-                                    if (!error) {
-                                        formik.setFieldValue("imageUuid", file.serverId);
-                                    }
-                                }}
-                                onremovefile={() => {
-                                    formik.setFieldValue("imageUuid", "");
-                                }}
-                            />
+                            {formik.values.imageUuid ? (
+                                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, p: 2, border: '1px dashed #ccc', borderRadius: 1, bgcolor: '#fafafa' }}>
+
+                                    <SecureImage
+                                        imageId={formik.values.imageUuid}
+                                        alt={formik.values.name} // Para que al descargar tenga el nombre
+                                        width={150}
+                                        height={150}
+                                        clickable
+                                    />
+
+                                    <Typography variant="caption" color="textSecondary">
+                                        <Button
+                                            color="error"
+                                            variant="outlined"
+                                            onClick={handleDeleteImage}
+                                            disabled={isDeletingImg}
+                                            sx={{ mt: 1 }}
+                                        >
+                                            {isDeletingImg ? "Borrando de la BBDD..." : "Eliminar Imagen"}
+                                        </Button>                                    </Typography>
+
+                                </Box>
+                            ) : (
+                                <FilePond
+                                    allowMultiple={false}
+                                    maxFiles={1}
+                                    name="file"
+                                    labelIdle='Arrastra tu imagen o <span class="filepond--label-action">Examina</span>'
+                                    server={{
+                                        process: (fieldName, file, metadata, load, error, progress, abort) => {
+                                            return processFileUpload(fieldName, file, metadata, load, error, progress, abort);
+                                        }
+                                    }}
+                                    onprocessfile={(error, file) => {
+                                        if (!error) {
+                                            formik.setFieldValue("imageUuid", file.serverId);
+                                        }
+                                    }}
+                                    onremovefile={() => {
+                                        formik.setFieldValue("imageUuid", "");
+                                    }}
+                                />
+                            )}
                         </Box>
 
                         <TextField
@@ -175,6 +224,7 @@ export const LocationDialogMui = ({ open, onClose, onSave, locationToEdit }: Loc
 
                     </Box>
                 </DialogContent>
+
                 <DialogActions>
                     <Button onClick={onClose} color="error">Cancelar</Button>
                     <Button onClick={() => formik.resetForm()} type="reset" variant="outlined" color="secondary">
@@ -186,5 +236,6 @@ export const LocationDialogMui = ({ open, onClose, onSave, locationToEdit }: Loc
                 </DialogActions>
             </form>
         </Dialog>
+
     );
 };

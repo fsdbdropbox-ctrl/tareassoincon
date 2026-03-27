@@ -3,7 +3,7 @@ import { MainLayout } from "./components/MainLayout";
 import { MaterialsView } from "./pages/MaterialsView";
 import { LocationView } from "./pages/LocationView";
 import { LocationMaterials } from "./pages/LocationMaterials";
-
+import './translation/i18n';
 function App() {
   return (
     <BrowserRouter>

@@ -1,5 +1,5 @@
 import * as Yup from "yup";
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, Box, FormControlLabel, Checkbox, MenuItem, CircularProgress } from "@mui/material";
+import { Dialog, DialogTitle, DialogContent, DialogActions, Typography, Button, TextField, Box, FormControlLabel, Checkbox, MenuItem, CircularProgress } from "@mui/material";
 import { useState, useEffect } from "react";
 import { Material } from "../../types/materials";
 import { useFormik } from "formik";
@@ -12,9 +12,9 @@ import 'filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css';
 
 import FilePondPluginFileValidateType from 'filepond-plugin-file-validate-type';
 import FilePondPluginFileValidateSize from 'filepond-plugin-file-validate-size';
-import { processFileUpload } from "../../api/documentService";
+import { processFileUpload, deleteDocument } from "../../api/documentService";
 
-// import { processFileUpload } from "../../api/documentService";
+import { SecureImage } from "../common/images/SecureImage";
 
 registerPlugin(
     FilePondPluginImagePreview,
@@ -78,6 +78,29 @@ export const MaterialDialogMui = ({ open, onClose, onSubmit, initialValues }: Pr
 
     });
 
+
+    const [isDeleting, setIsDeleting] = useState(false);
+
+    const handleDeleteImg = async () => {
+        const uuid = formik.values.imageUuid;
+        if (!uuid) return;
+
+        const confirm = window.confirm("¿Seguro que quieres borrar la imagen del material de la base de datos?")
+        if (!confirm) return;
+
+        setIsDeleting(true);
+
+        try {
+            await deleteDocument(uuid.toString());
+            formik.setFieldValue("imageUuid", "");
+        } catch (error) {
+            console.error("Error al borrar la imagen, " + error);
+            alert("Hubo un error al intentar la imagen del servidor")
+        } finally {
+            setIsDeleting(false);
+        }
+    }
+
     return (
 
         <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">            <DialogTitle>{initialValues ? "Editar Material General" : "Nuevo Material"}</DialogTitle>
@@ -85,34 +108,59 @@ export const MaterialDialogMui = ({ open, onClose, onSubmit, initialValues }: Pr
                 <DialogContent>
                     <Box>
                         <Box sx={{ fontWeight: 'bold', mb: 1, color: '#555' }}>Imagen del Material</Box>
-                        <FilePond
-                            files={files}
-                            onupdatefiles={setFiles}
-                            allowMultiple={false}
-                            maxFiles={1}
-                            name="file"
-                            labelIdle='Arrastra tu imagen o <span class="filepond--label-action">Insertar</span>'
-                            acceptedFileTypes={['image/jpeg', 'image/png', 'image/webp', 'image/jpg']}
-                            allowFileSizeValidation={true}
-                            maxFileSize="5MB"
+                        {formik.values.imageUuid ? (
+                            // SI TIENE IMAGEN: Mostramos el SecureImage
+                            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, p: 2, border: '1px dashed #ccc', borderRadius: 1, bgcolor: '#fafafa' }}>
 
-                            server={{
-                                process: processFileUpload,
+                                <SecureImage
+                                    imageId={formik.values.imageUuid}
+                                    alt={formik.values.name || "Material"} // Usa el nombre si lo tienes en el formik
+                                    width={150}
+                                    height={150}
+                                    clickable
+                                />
 
-                                revert: (uniqueFileId, load, error) => {
-                                    formik.setFieldValue("imageUuid", null);
-                                    load();
-                                }
+                                <Button
+                                    color="error"
+                                    variant="outlined"
+                                    onClick={handleDeleteImg}
+                                    disabled={isDeleting}
+                                    sx={{ mt: 1 }}
+                                >
+                                    {isDeleting ? "Borrando de la BBDD..." : "Eliminar Imagen"}
+                                </Button>
 
-                            }}
+                            </Box>
+                        ) : (
+                            <FilePond
+                                files={files}
+                                onupdatefiles={setFiles}
+                                allowMultiple={false}
+                                maxFiles={1}
+                                name="file"
+                                labelIdle='Arrastra tu imagen o <span class="filepond--label-action">Insertar</span>'
+                                acceptedFileTypes={['image/jpeg', 'image/png', 'image/webp', 'image/jpg']}
+                                allowFileSizeValidation={true}
+                                maxFileSize="5MB"
 
-                            onprocessfile={(error, file) => {
-                                if (!error) {
-                                    formik.setFieldValue("imageUuid", file.serverId);
-                                }
-                            }}
-                        />
-                        <TextField
+                                server={{
+                                    process: processFileUpload,
+
+                                    revert: (uniqueFileId, load, error) => {
+                                        formik.setFieldValue("imageUuid", null);
+                                        load();
+                                    }
+
+                                }}
+
+                                onprocessfile={(error, file) => {
+                                    if (!error) {
+                                        formik.setFieldValue("imageUuid", file.serverId);
+                                    }
+                                }}
+                            />
+                        )}
+                        < TextField
                             fullWidth
                             name="code"
                             label="code"

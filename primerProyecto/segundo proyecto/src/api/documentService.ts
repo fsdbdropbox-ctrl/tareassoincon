@@ -150,6 +150,7 @@ export const preloadImagesIntoCache = (imagesUuids: (string | null | undefined)[
             size: validUuids.length
         };
 
+
         const response = await fetch(`${BASE_URL_DOCS}/file/searchImages`, {
             method: "POST",
             headers: {
@@ -157,8 +158,10 @@ export const preloadImagesIntoCache = (imagesUuids: (string | null | undefined)[
                 "Content-Type": "application/json",
                 "Accept": "application/json"
             },
-            body: JSON.stringify(requestBody)
+            body: JSON.stringify(requestBody),
+
         });
+
 
         if (!response.ok) {
             throw new Error("Error al hacer la petición masiva");
@@ -189,6 +192,102 @@ export const preloadImagesIntoCache = (imagesUuids: (string | null | undefined)[
             throw err;
         })
     })
+}
 
+
+
+
+export const getNumericIdFromUuid = async (imageUuid: string): Promise<number | null> => {
+    const token = await getValidToken();
+
+    const requestBody = {
+        filter: {
+            ids: [imageUuid],
+            includeData: false
+        },
+        page: 0,
+        size: 1
+    };
+    const searchResponse = await fetch(`${BASE_URL_DOCS}/file/searchImages`, {
+        method: "POST",
+        headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(requestBody)
+    });
+    if (!searchResponse.ok) {
+        throw new Error("Error buscando los metadatos de la imagen");
+    }
+    const searchData = await searchResponse.json();
+    if (!searchData || searchData.length === 0) {
+        return null;
+    }
+
+    const docInfo = searchData[0];
+
+    const numericId = docInfo.idDocs || docInfo.idDoc || docInfo.idDocument || docInfo.id;
+
+    if (numericId === undefined || numericId === null) {
+        console.error("Respuesta del servidor sin Id numérico: " + docInfo);
+        throw new Error("El servidor no devolvio el Id numérico");
+    }
+    return Number(numericId);
+}
+
+
+
+export const downloadDocument = async (imageUuid: string, suggestedName?: string) => {
+    const token = await getValidToken();
+
+
+    const numericId = await getNumericIdFromUuid(imageUuid);
+
+    const response = await fetch(`${BASE_URL_DOCS}/file/downloadFile/${numericId}/1`, {
+        method: "GET",
+        headers: {
+            "Authorization": `Bearer ${token}`
+        }
+    });
+    if (!response.ok) throw new Error("Error al descargar la imagen: " + response.statusText);
+
+
+    const blob = await response.blob();
+    const extension = blob.type ? blob.type.split('/')[1] : 'jpg';
+
+    const safeName = suggestedName ? suggestedName.replace(/[^a-z0-9]/gi, '_').toLocaleLowerCase() : `doc_${numericId}`;
+    const finalFileName = `${safeName}.${extension}`;
+
+
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = finalFileName;
+
+    document.body.appendChild(link)
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+
+}
+
+
+export const deleteDocument = async (imageUuid: string) => {
+
+    const numericId = await getNumericIdFromUuid(imageUuid);
+    if (!numericId) return true;
+
+    const token = await getValidToken()
+    const deleteRes = await fetch(`${BASE_URL_DOCS}/document/${numericId}`, {
+        method: "DELETE",
+        headers: {
+            "Authorization": `Bearer ${token}`
+        }
+    })
+
+    if (!deleteRes.ok) {
+        throw new Error(`Error al borrar el documento: ${deleteRes.statusText}`);
+    }
+    return true;
 
 }

@@ -1,6 +1,6 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
-
+// import languagDetector from 'i18next-browser-languagedetector';
 const resources = {
     es: {
         translation: {
@@ -14,6 +14,7 @@ const resources = {
                     "back": "← Volver",
                     "edit_selected": "Editar Seleccionado",
                     "delete_selected": "- Eliminar ({{count}})",
+                    "delete_image": "Eliminar Imagen",
                     "delete_selected_long": "- Borrar Seleccionados ({{count}})"
                 },
                 "status": {
@@ -23,6 +24,7 @@ const resources = {
                     "unknown": "Desconocido",
                     "unassigned": "Sin asignar",
                     "na": "N/A",
+                    "deleting": "Borrando de la BBDD...",
                     "select_option": "Seleccione una unidad..."
                 },
                 "validation": {
@@ -42,7 +44,17 @@ const resources = {
                 },
                 "image": {
                     "col_header": "Img",
+                    "delete_confirm": "¿Seguro que quieres borrar la imagen de la base de datos? Esta acción no se puede deshacer.",
+                    "delete_error": "Hubo un error al intentar borrar la imagen del servidor.",
                     "drag_drop": "Arrastra tu imagen o <span class=\"filepond--label-action\">Examina</span>"
+                },
+                "alerts": {
+                    "delete_confirm_count": "¿Seguro que quieres borrar {{count}} elementos seleccionados?",
+                    "delete_success": "Elementos borrados correctamente",
+                    "delete_error": "Error al eliminar. Es posible que haya un problema de base de datos.",
+                    "delete_error_in_use": "Error al borrar. Es posible que el elemento esté en uso o haya un problema de base de datos.",
+                    "save_success": "Datos guardados correctamente",
+                    "save_error": "Hubo un error al guardar. Revisa los datos."
                 }
             },
             "materials": {
@@ -102,7 +114,7 @@ const resources = {
                     "edit_title": "Editar Asignación",
                     "material_label": "Material"
                 }
-            }
+            },
         }
     },
     en: {
@@ -117,6 +129,7 @@ const resources = {
                     "back": "← Go Back",
                     "edit_selected": "Edit Selected",
                     "delete_selected": "- Delete ({{count}})",
+                    "delete_image": "Delete Image",
                     "delete_selected_long": "- Delete Selected ({{count}})"
                 },
                 "status": {
@@ -126,6 +139,7 @@ const resources = {
                     "unknown": "Unknown",
                     "unassigned": "Unassigned",
                     "na": "N/A",
+                    "deleting": "Deleting from DB...",
                     "select_option": "Select a unit..."
                 },
                 "validation": {
@@ -145,7 +159,9 @@ const resources = {
                 },
                 "image": {
                     "col_header": "Img",
-                    "drag_drop": "Drag & Drop your picture or <span class=\"filepond--label-action\">Browse</span>"
+                    "drag_drop": "Drag & Drop your picture or <span class=\"filepond--label-action\">Browse</span>",
+                    "delete_confirm": "Are you sure you want to delete the image from the database? This action cannot be undone.",
+                    "delete_error": "There was an error trying to delete the image from the server."
                 }
             },
             "materials": {
@@ -205,17 +221,31 @@ const resources = {
                     "edit_title": "Edit Assignment",
                     "material_label": "Material"
                 }
+            },
+            "alerts": {
+                "delete_confirm_count": "Are you sure you want to delete {{count}} selected items?",
+                "delete_success": "Items successfully deleted",
+                "delete_error": "Error deleting. There might be a database issue.",
+                "delete_error_in_use": "Error deleting. The item might be in use or there is a database issue.",
+                "save_success": "Data successfully saved",
+                "save_error": "There was an error saving. Please check the data."
             }
         }
     }
 };
 
+const browserLanguage = navigator.language;
+const shortLang = browserLanguage.split('-')[0];
+
+const startingLanguage = shortLang === "es" ? "es" : "en";
+
 i18n
     .use(initReactI18next)
     .init({
         resources,
-        lng: "es",
+        lng: startingLanguage,
         fallbackLng: "en",
+        load: 'languageOnly',
         interpolation: {
             escapeValue: false
         }

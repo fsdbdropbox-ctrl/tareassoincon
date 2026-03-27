@@ -8,8 +8,11 @@ import { MaterialDialogMui } from "../components/materials/MaterialsDialogMui";
 import { preloadImagesIntoCache } from "../api/documentService";
 import { GeneralFilter, GeneralFilterValues } from "../components/common/filters/GeneralFilter";
 import { useStompoStock } from "../hooks/useStompStock";
+import { useTranslation } from "react-i18next";
 
 export const MaterialsView = () => {
+
+    const { t } = useTranslation();
 
     // Tabla
     const [materials, setMaterials] = useState<Material[]>([]);
@@ -100,21 +103,20 @@ export const MaterialsView = () => {
     }
 
     const handleDeleteSelected = async () => {
-        const confirmacion = window.confirm(`¿Seguro que quieres borrar ${selectedRowIds.ids.size} materiales?`);
+        const confirmacion = window.confirm(t('common.alerts.delete_confirm_count', { count: selectedRowIds.ids.size }));
         if (!confirmacion) return;
-
         setLoading(true);
         try {
             // Convertimos el Set a un Array para poder iterar y borrar
             const idsArray = Array.from(selectedRowIds.ids);
             await Promise.all(idsArray.map(id => deleteMaterial(Number(id))));
 
-            alert("Materiales borrados correctamente");
+            alert(t('common.alerts.delete_success'));
             setSelectedRowIds({ ids: new Set() }); // Limpiar selección
             fetchMaterialsData(); // Recargar la tabla
         } catch (error) {
             console.error("Error al borrar:", error);
-            alert("Error al borrar. Es posible que el material esté en uso o haya un problema de base de datos.");
+            alert(t('common.alerts.delete_error_in_use'));
         } finally {
             setLoading(false);
         }
@@ -136,21 +138,20 @@ export const MaterialsView = () => {
             }
 
             setIsDialogOpen(false);
-            alert("Material guardado correctamente")
+            alert(t('common.alerts.save_success'));
             fetchMaterialsData();
 
 
         } catch (error) {
             console.error("Error al guardar el material:", error);
-            alert("Hubo un error al guardar el material.");
+            alert(t('common.alerts.save_error'));
         } finally { setLoading(false); }
 
     }
 
     return (
         <Box sx={{ width: "100%", height: "100%" }}>
-            <Typography variant="h4">Materiales</Typography>
-            <GeneralFilter onFilter={handleApplyFilters} />
+            <Typography variant="h4">{t('materials.view_title')}</Typography>            <GeneralFilter onFilter={handleApplyFilters} />
             <MaterialTableMui
                 materials={materials}
                 rowCount={rowCount}

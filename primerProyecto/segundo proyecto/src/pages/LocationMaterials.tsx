@@ -10,10 +10,13 @@ import { addMaterialToLocation, updateLocationMaterial } from "../api/locationSe
 import { LocationMaterialDialogMui } from "../components/locations/LocationMaterialDialogMui";
 import { getLocationById } from "../api/locationService";
 import { MasterLocation } from "../types/MasterLocations";
-import { useMemo } from "react";
 import { preloadImagesIntoCache } from "../api/documentService";
+import { useTranslation } from "react-i18next";
 
 export const LocationMaterials = () => {
+
+    const { t } = useTranslation();
+
     const { id } = useParams();
     const navigate = useNavigate();
     const selectedLocationId = Number(id);
@@ -95,14 +98,14 @@ export const LocationMaterials = () => {
     }, [fetchLocationData]);
 
     const handleDeleteSelected = async () => {
-        const confirm = window.confirm(`¿Borrar ${selectedIds.ids.size} materiales?`);
+        const confirm = window.confirm(t('common.alerts.delete_confirm_count', { count: selectedIds.ids.size }));
         if (!confirm) return;
         setLoading(true);
         try {
             await Promise.all(Array.from(selectedIds.ids).map(delId => deleteLocationMaterial(Number(delId))));
             fetchLocationData();
         } catch (error) {
-            alert("Error al eliminar");
+            alert(t('common.alerts.delete_error'));
         } finally {
             setLoading(false);
         }
@@ -147,7 +150,7 @@ export const LocationMaterials = () => {
 
         } catch (error) {
             console.error("Error guardando la relación: ", error)
-            alert("No se pudo guardar la asignación");
+            alert(t('common.alerts.save_error'));
         } finally {
             setLoading(false);
         }
@@ -158,13 +161,13 @@ export const LocationMaterials = () => {
         <Box sx={{ width: "100%", height: "100%" }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2, p: 2, border: '1px solid #ccc', borderRadius: 1, backgroundColor: '#f9f9f9' }}>
                 <Button variant="outlined" onClick={() => navigate("/locations")}>
-                    ← Volver
+                    {t('common.buttons.back')}
                 </Button>
                 <Typography variant="h6" sx={{ fontWeight: "bold", color: "#3f51b5" }}>
-                    Localización: {locationDetail?.name || "Cargando..."}
+                    {t('location_materials.view_title')} {locationDetail?.name || t('common.status.loading')}
                 </Typography>
                 <Typography variant="body2" color="textSecondary">
-                    Código: {locationDetail?.code || "---"} | ID: {selectedLocationId}
+                    {t('common.filters.code')}: {locationDetail?.code || "---"} | ID: {selectedLocationId}
                 </Typography>
             </Box>
 
