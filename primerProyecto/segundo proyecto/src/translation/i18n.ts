@@ -5,6 +5,11 @@ const resources = {
     es: {
         translation: {
             "common": {
+                "table": {
+                    "rows_per_page": "Filas por página:",
+                    "of": "de",
+                    "more_than": "más de"
+                },
                 "buttons": {
                     "save": "Guardar",
                     "save_changes": "Guardar Cambios",
@@ -15,7 +20,8 @@ const resources = {
                     "edit_selected": "Editar Seleccionado",
                     "delete_selected": "- Eliminar ({{count}})",
                     "delete_image": "Eliminar Imagen",
-                    "delete_selected_long": "- Borrar Seleccionados ({{count}})"
+                    "delete_selected_long": "- Borrar Seleccionados ({{count}})",
+                    "download_original": "Descargar Imagen Original"
                 },
                 "status": {
                     "loading": "Cargando...",
@@ -25,7 +31,8 @@ const resources = {
                     "unassigned": "Sin asignar",
                     "na": "N/A",
                     "deleting": "Borrando de la BBDD...",
-                    "select_option": "Seleccione una unidad..."
+                    "select_option": "Seleccione una unidad...",
+                    "downloading": "Descargando..."
                 },
                 "validation": {
                     "required": "Obligatorio",
@@ -35,6 +42,9 @@ const resources = {
                     "type_req": "El tipo es requerido",
                     "negative_amount": "La cantidad no puede ser negativa",
                     "select_material": "Debe seleccionar un material"
+                },
+                "labels": {
+                    "id": "ID"
                 },
                 "filters": {
                     "code": "Código",
@@ -46,7 +56,9 @@ const resources = {
                     "col_header": "Img",
                     "delete_confirm": "¿Seguro que quieres borrar la imagen de la base de datos? Esta acción no se puede deshacer.",
                     "delete_error": "Hubo un error al intentar borrar la imagen del servidor.",
-                    "drag_drop": "Arrastra tu imagen o <span class=\"filepond--label-action\">Examina</span>"
+                    "drag_drop": "Arrastra tu imagen o <span class=\"filepond--label-action\">Examina</span>",
+                    "alt_material": "Material",
+                    "download_error": "Hubo un error al descargar la imagen."
                 },
                 "alerts": {
                     "delete_confirm_count": "¿Seguro que quieres borrar {{count}} elementos seleccionados?",
@@ -57,6 +69,7 @@ const resources = {
                     "save_error": "Hubo un error al guardar. Revisa los datos."
                 }
             },
+
             "materials": {
                 "view_title": "Materiales",
                 "add_button": "+ Agregar Material",
@@ -72,6 +85,12 @@ const resources = {
                     "finished": "Producto Terminado",
                     "virtual": "Es Virtual",
                     "other": "Otro"
+                },
+                "types_compact": {
+                    "raw": "Materia Prima",
+                    "semi": "Semielaborado",
+                    "finished": "Terminado",
+                    "virtual": "Virtual"
                 },
                 "dialog": {
                     "create_title": "Nuevo Material",
@@ -107,8 +126,12 @@ const resources = {
                     "mat_id": "Id del Material",
                     "mat_name": "Nombre del Material",
                     "quantity": "Cantidad",
-                    "is_default": "Ubicación Principal?"
+                    "is_default": "Ubicación Principal?",
+                    "external_code_short": "Cód. Externo",
+                    "measure_unit_short": "U. Medida",
+                    "material_type": "Tipo de material"
                 },
+                "checkbox_primary_location": "Ubicación principal",
                 "dialog": {
                     "create_title": "Asignar Material a la Localización",
                     "edit_title": "Editar Asignación",
@@ -120,6 +143,11 @@ const resources = {
     en: {
         translation: {
             "common": {
+                "table": {
+                    "rows_per_page": "Rows per page:",
+                    "of": "of",
+                    "more_than": "more than"
+                },
                 "buttons": {
                     "save": "Save",
                     "save_changes": "Save Changes",
@@ -130,7 +158,8 @@ const resources = {
                     "edit_selected": "Edit Selected",
                     "delete_selected": "- Delete ({{count}})",
                     "delete_image": "Delete Image",
-                    "delete_selected_long": "- Delete Selected ({{count}})"
+                    "delete_selected_long": "- Delete Selected ({{count}})",
+                    "download_original": "Download Original Image"
                 },
                 "status": {
                     "loading": "Loading...",
@@ -140,7 +169,8 @@ const resources = {
                     "unassigned": "Unassigned",
                     "na": "N/A",
                     "deleting": "Deleting from DB...",
-                    "select_option": "Select a unit..."
+                    "select_option": "Select a unit...",
+                    "downloading": "Downloading..."
                 },
                 "validation": {
                     "required": "Required",
@@ -150,6 +180,9 @@ const resources = {
                     "type_req": "Type is required",
                     "negative_amount": "Amount cannot be negative",
                     "select_material": "You must select a material"
+                },
+                "labels": {
+                    "id": "ID"
                 },
                 "filters": {
                     "code": "Code",
@@ -161,9 +194,20 @@ const resources = {
                     "col_header": "Img",
                     "drag_drop": "Drag & Drop your picture or <span class=\"filepond--label-action\">Browse</span>",
                     "delete_confirm": "Are you sure you want to delete the image from the database? This action cannot be undone.",
-                    "delete_error": "There was an error trying to delete the image from the server."
+                    "delete_error": "There was an error trying to delete the image from the server.",
+                    "alt_material": "Material",
+                    "download_error": "There was an error downloading the image."
+                },
+                "alerts": {
+                    "delete_confirm_count": "Are you sure you want to delete {{count}} selected items?",
+                    "delete_success": "Items successfully deleted",
+                    "delete_error": "Error deleting. There might be a database issue.",
+                    "delete_error_in_use": "Error deleting. The item might be in use or there is a database issue.",
+                    "save_success": "Data successfully saved",
+                    "save_error": "There was an error saving. Please check the data."
                 }
             },
+
             "materials": {
                 "view_title": "Materials",
                 "add_button": "+ Add Material",
@@ -179,6 +223,12 @@ const resources = {
                     "finished": "Finished Product",
                     "virtual": "Is Virtual",
                     "other": "Other"
+                },
+                "types_compact": {
+                    "raw": "Raw Material",
+                    "semi": "Semifinished",
+                    "finished": "Finished",
+                    "virtual": "Virtual"
                 },
                 "dialog": {
                     "create_title": "New Material",
@@ -214,21 +264,17 @@ const resources = {
                     "mat_id": "Material Id",
                     "mat_name": "Material Name",
                     "quantity": "Quantity",
-                    "is_default": "Main Location?"
+                    "is_default": "Main Location?",
+                    "external_code_short": "Ext. Code",
+                    "measure_unit_short": "Meas. Unit",
+                    "material_type": "Material type"
                 },
+                "checkbox_primary_location": "Primary location",
                 "dialog": {
                     "create_title": "Assign Material to Location",
                     "edit_title": "Edit Assignment",
                     "material_label": "Material"
                 }
-            },
-            "alerts": {
-                "delete_confirm_count": "Are you sure you want to delete {{count}} selected items?",
-                "delete_success": "Items successfully deleted",
-                "delete_error": "Error deleting. There might be a database issue.",
-                "delete_error_in_use": "Error deleting. The item might be in use or there is a database issue.",
-                "save_success": "Data successfully saved",
-                "save_error": "There was an error saving. Please check the data."
             }
         }
     }

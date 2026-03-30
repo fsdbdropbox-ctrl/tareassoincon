@@ -15,6 +15,8 @@ import FilePondPluginFileValidateSize from 'filepond-plugin-file-validate-size';
 import { processFileUpload, deleteDocument } from "../../api/documentService";
 
 import { SecureImage } from "../common/images/SecureImage";
+import { useTranslation } from "react-i18next";
+
 
 registerPlugin(
     FilePondPluginImagePreview,
@@ -51,6 +53,8 @@ export const MaterialDialogMui = ({ open, onClose, onSubmit, initialValues }: Pr
         }
     }, [open]);
 
+    const { t } = useTranslation();
+
 
     const formik = useFormik({
         initialValues: initialValues || {
@@ -67,9 +71,9 @@ export const MaterialDialogMui = ({ open, onClose, onSubmit, initialValues }: Pr
         } as unknown as Partial<Material>,
         enableReinitialize: true,
         validationSchema: Yup.object({
-            code: Yup.string().required("El código es requerido"),
-            name: Yup.string().required("El nombre es requerido"),
-            measureUnitId: Yup.number().required("La unidad de medida es requerida"),
+            code: Yup.string().required(t('common.validation.code_req')),
+            name: Yup.string().required(t('common.validation.name_req')),
+            measureUnitId: Yup.number().required(t('common.validation.unit_req')),
 
         }),
         onSubmit: (values) => {
@@ -85,7 +89,8 @@ export const MaterialDialogMui = ({ open, onClose, onSubmit, initialValues }: Pr
         const uuid = formik.values.imageUuid;
         if (!uuid) return;
 
-        const confirm = window.confirm("¿Seguro que quieres borrar la imagen del material de la base de datos?")
+        const confirm = window.confirm(t('common.image.delete_confirm'))
+
         if (!confirm) return;
 
         setIsDeleting(true);
@@ -95,7 +100,7 @@ export const MaterialDialogMui = ({ open, onClose, onSubmit, initialValues }: Pr
             formik.setFieldValue("imageUuid", "");
         } catch (error) {
             console.error("Error al borrar la imagen, " + error);
-            alert("Hubo un error al intentar la imagen del servidor")
+            alert(t('common.image.delete_error'));
         } finally {
             setIsDeleting(false);
         }
@@ -103,18 +108,21 @@ export const MaterialDialogMui = ({ open, onClose, onSubmit, initialValues }: Pr
 
     return (
 
-        <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">            <DialogTitle>{initialValues ? "Editar Material General" : "Nuevo Material"}</DialogTitle>
+        <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
+            <DialogTitle>
+                {initialValues ? t('materials.dialog.edit_title') : t('materials.dialog.create_title')}
+            </DialogTitle>
             <form onSubmit={formik.handleSubmit}>
                 <DialogContent>
                     <Box>
-                        <Box sx={{ fontWeight: 'bold', mb: 1, color: '#555' }}>Imagen del Material</Box>
+                        <Box sx={{ fontWeight: 'bold', mb: 1, color: '#555' }}>{t('materials.dialog.image_title')}</Box>
                         {formik.values.imageUuid ? (
                             // SI TIENE IMAGEN: Mostramos el SecureImage
                             <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, p: 2, border: '1px dashed #ccc', borderRadius: 1, bgcolor: '#fafafa' }}>
 
                                 <SecureImage
                                     imageId={formik.values.imageUuid}
-                                    alt={formik.values.name || "Material"} // Usa el nombre si lo tienes en el formik
+                                    alt={formik.values.name || t('common.image.alt_material')}
                                     width={150}
                                     height={150}
                                     clickable
@@ -127,7 +135,7 @@ export const MaterialDialogMui = ({ open, onClose, onSubmit, initialValues }: Pr
                                     disabled={isDeleting}
                                     sx={{ mt: 1 }}
                                 >
-                                    {isDeleting ? "Borrando de la BBDD..." : "Eliminar Imagen"}
+                                    {isDeleting ? t('common.status.deleting') : t('common.buttons.delete_image')}
                                 </Button>
 
                             </Box>
@@ -138,7 +146,7 @@ export const MaterialDialogMui = ({ open, onClose, onSubmit, initialValues }: Pr
                                 allowMultiple={false}
                                 maxFiles={1}
                                 name="file"
-                                labelIdle='Arrastra tu imagen o <span class="filepond--label-action">Insertar</span>'
+                                labelIdle={t('common.image.drag_drop')}
                                 acceptedFileTypes={['image/jpeg', 'image/png', 'image/webp', 'image/jpg']}
                                 allowFileSizeValidation={true}
                                 maxFileSize="5MB"
@@ -163,7 +171,7 @@ export const MaterialDialogMui = ({ open, onClose, onSubmit, initialValues }: Pr
                         < TextField
                             fullWidth
                             name="code"
-                            label="code"
+                            label={t('common.filters.code')}
                             value={formik.values.code}
                             onChange={formik.handleChange}
                             error={formik.touched.code && Boolean(formik.errors.code)}
@@ -172,7 +180,7 @@ export const MaterialDialogMui = ({ open, onClose, onSubmit, initialValues }: Pr
                         <TextField
                             fullWidth
                             name="name"
-                            label="name"
+                            label={t('common.filters.name')}
                             value={formik.values.name}
                             onChange={formik.handleChange}
                             error={formik.touched.name && Boolean(formik.errors.name)}
@@ -181,7 +189,7 @@ export const MaterialDialogMui = ({ open, onClose, onSubmit, initialValues }: Pr
                         <TextField
                             fullWidth
                             name="externalCode"
-                            label="Código Externo"
+                            label={t('common.filters.externalCode')}
                             value={formik.values.externalCode}
                             onChange={formik.handleChange}
                             error={formik.touched.externalCode && Boolean(formik.errors.externalCode)}
@@ -191,7 +199,7 @@ export const MaterialDialogMui = ({ open, onClose, onSubmit, initialValues }: Pr
                             fullWidth
                             select
                             name="measureUnitId"
-                            label="Unidad de medida"
+                            label={t('materials.columns.measure_unit')}
                             value={formik.values.measureUnitId || ''}
                             onChange={formik.handleChange}
                             error={formik.touched.measureUnitId && Boolean(formik.errors.measureUnitId)}
@@ -199,11 +207,11 @@ export const MaterialDialogMui = ({ open, onClose, onSubmit, initialValues }: Pr
                             disabled={loadingUnits}
                         >
                             <MenuItem value="">
-                                <em>Seleccione una unidad...</em>
+                                <em>{t('common.status.select_option')}</em>
                             </MenuItem>
                             {loadingUnits ? (
                                 <MenuItem value={formik.values.measureUnitId || ''} disabled> <CircularProgress size={20} />
-                                    cargando...</MenuItem>
+                                    {t('common.status.loading')}</MenuItem>
                             ) : (
                                 units.map((unit) => (
                                     <MenuItem key={unit.id} value={unit.id}>
@@ -214,13 +222,13 @@ export const MaterialDialogMui = ({ open, onClose, onSubmit, initialValues }: Pr
                         </TextField>
 
                         <Box sx={{ border: '1px solid #ddd', p: 2, borderRadius: 1 }}>
-                            <Box sx={{ fontWeight: 'bold', mb: 1 }}>Tipo de Material</Box>
+                            <Box sx={{ fontWeight: 'bold', mb: 1 }}>{t('materials.dialog.type_title')}</Box>
                             <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}></Box>
 
-                            <FormControlLabel control={<Checkbox name="isRawMaterial" checked={formik.values.isRawMaterial} onChange={formik.handleChange} />} label="Materia Prima" />
-                            <FormControlLabel control={<Checkbox name="isSemifinished" checked={formik.values.isSemifinished} onChange={formik.handleChange} />} label="Semielaborado" />
-                            <FormControlLabel control={<Checkbox name="isFinished" checked={formik.values.isFinished} onChange={formik.handleChange} />} label="Producto Terminado" />
-                            <FormControlLabel control={<Checkbox name="isVirtual" checked={formik.values.isVirtual} onChange={formik.handleChange} />} label="Es Virtual" />
+                            <FormControlLabel control={<Checkbox name="isRawMaterial" checked={formik.values.isRawMaterial} onChange={formik.handleChange} />} label={t('materials.types.raw')} />
+                            <FormControlLabel control={<Checkbox name="isSemifinished" checked={formik.values.isSemifinished} onChange={formik.handleChange} />} label={t('materials.types.semi')} />
+                            <FormControlLabel control={<Checkbox name="isFinished" checked={formik.values.isFinished} onChange={formik.handleChange} />} label={t('materials.types.finished')} />
+                            <FormControlLabel control={<Checkbox name="isVirtual" checked={formik.values.isVirtual} onChange={formik.handleChange} />} label={t('materials.types.virtual')} />
                         </Box>
 
                         <TextField
@@ -228,7 +236,7 @@ export const MaterialDialogMui = ({ open, onClose, onSubmit, initialValues }: Pr
                             multiline
                             rows={2}
                             name="description"
-                            label="Descripción"
+                            label={t('common.filters.description')}
                             value={formik.values.description}
                             onChange={formik.handleChange}
                         />
@@ -239,15 +247,15 @@ export const MaterialDialogMui = ({ open, onClose, onSubmit, initialValues }: Pr
                             multiline
                             rows={2}
                             name="observations"
-                            label="Observaciones"
+                            label={t('materials.columns.observations')}
                             value={formik.values.observations}
                             onChange={formik.handleChange}
                         />
                     </Box>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={onClose} color="error">Cancelar</Button>
-                    <Button type="submit" variant="contained" color="primary">Guardar</Button>
+                    <Button onClick={onClose} color="error">{t('common.buttons.cancel')}</Button>
+                    <Button type="submit" variant="contained" color="primary">{t('common.buttons.save')}</Button>
                 </DialogActions>
 
             </form>
@@ -257,23 +265,5 @@ export const MaterialDialogMui = ({ open, onClose, onSubmit, initialValues }: Pr
     );
 
 
-
-
-
-
-
-
-
-
 }
 
-export const materialValidationSchema = Yup.object().shape({
-    code: Yup.string().required("El código es requerido"),
-    name: Yup.string().required("El nombre es requerido"),
-    measureUnitId: Yup.number().required("La unidad de medida es requerida"),
-
-    isVirtual: Yup.boolean().required("El tipo es requerido"),
-    isRawMaterial: Yup.boolean().required("El tipo es requerido"),
-    isSemifinished: Yup.boolean().required("El tipo es requerido"),
-    isFinished: Yup.boolean().required("El tipo es requerido"),
-});

@@ -3,6 +3,7 @@ import { CircularProgress, Box, Dialog, DialogContent, DialogActions, Button, Ic
 import CloseIcon from '@mui/icons-material/Close';
 import DownloadIcon from '@mui/icons-material/Download';
 import { fetchImagePreview, downloadDocument } from "../../../api/documentService";
+import { useTranslation } from "react-i18next";
 
 interface Props {
     imageId?: string | number | null;
@@ -14,6 +15,9 @@ interface Props {
 
 
 export const SecureImage = ({ imageId, alt, width = 50, height = 50, clickable = false }: Props) => {
+
+    const { t } = useTranslation();
+    const resolvedAlt = alt ?? t('common.image.alt_material');
 
     const [imageUrl, setImageUrl] = useState<string | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
@@ -72,7 +76,7 @@ export const SecureImage = ({ imageId, alt, width = 50, height = 50, clickable =
             await downloadDocument(imageId.toString());
         } catch (error) {
             console.error("Error al descargar:", error);
-            alert("Hubo un error al descargar la imagen.");
+            alert(t('common.image.download_error'));
         } finally {
             setIsDownloading(false);
         }
@@ -84,7 +88,13 @@ export const SecureImage = ({ imageId, alt, width = 50, height = 50, clickable =
 
     if (!imageId) {
 
-        return <Box sx={{ width, height, bgcolor: '#f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 1, fontSize: '0.6rem', color: 'gray' }}>Sin img</Box>;
+        return (
+            <Box
+                sx={{ width, height, bgcolor: '#f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 1, fontSize: '0.6rem', color: 'gray' }}
+            >
+                {t('common.status.no_image')}
+            </Box>
+        );
     }
 
     if (loading) {
@@ -92,7 +102,13 @@ export const SecureImage = ({ imageId, alt, width = 50, height = 50, clickable =
     }
 
     if (error || !imageUrl) {
-        return <Box sx={{ width, height, bgcolor: '#ffebee', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 1, fontSize: '0.6rem', color: 'red' }}>Error</Box>;
+        return (
+            <Box
+                sx={{ width, height, bgcolor: '#ffebee', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 1, fontSize: '0.6rem', color: 'red' }}
+            >
+                {t('common.status.error')}
+            </Box>
+        );
     }
 
     return (
@@ -100,7 +116,7 @@ export const SecureImage = ({ imageId, alt, width = 50, height = 50, clickable =
 
             <img
                 src={imageUrl}
-                alt={alt}
+                alt={resolvedAlt}
                 onClick={handleOpen}
                 style={{
                     width,
@@ -120,7 +136,7 @@ export const SecureImage = ({ imageId, alt, width = 50, height = 50, clickable =
                         >
                             <CloseIcon />
                         </IconButton>
-                        <img src={imageUrl} alt={alt} style={{ maxWidth: '100%', maxHeight: '80vh', objectFit: 'contain' }} />
+                        <img src={imageUrl} alt={resolvedAlt} style={{ maxWidth: '100%', maxHeight: '80vh', objectFit: 'contain' }} />
                     </DialogContent>
                     <DialogActions sx={{ justifyContent: 'center', bgcolor: '#f5f5f5' }}>
                         <Button
@@ -130,7 +146,7 @@ export const SecureImage = ({ imageId, alt, width = 50, height = 50, clickable =
                             disabled={isDownloading}
                             sx={{ backgroundColor: isDownloading ? "gray" : "#298d29", '&:hover': { backgroundColor: "#1e6b1e" } }}
                         >
-                            {isDownloading ? "Descargando..." : "Descargar Imagen Original"}
+                            {isDownloading ? t('common.status.downloading') : t('common.buttons.download_original')}
                         </Button>
                     </DialogActions>
                 </Dialog>

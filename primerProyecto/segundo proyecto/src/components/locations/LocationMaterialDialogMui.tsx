@@ -1,11 +1,12 @@
 import * as Yup from "yup";
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, Box, FormControlLabel, Checkbox, Autocomplete, CircularProgress } from "@mui/material";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useFormik } from "formik";
 import { Material } from "../../types/materials";
 import { LocationMaterial } from "../../types/locations";
 import { searchMaterials } from "../../api/materialService";
 import { SecureImage } from "../common/images/SecureImage";
+import { useTranslation } from "react-i18next";
 
 interface Props {
     open: boolean,
@@ -16,6 +17,7 @@ interface Props {
 
 export const LocationMaterialDialogMui = ({ open, onClose, onSubmit, initialValues }: Props) => {
 
+    const { t } = useTranslation();
     const [materialsOptions, setMaterialsOptions] = useState<Material[]>([]);
     const [loadingMaterials, setLoadingMaterials] = useState(false);
 
@@ -27,6 +29,20 @@ export const LocationMaterialDialogMui = ({ open, onClose, onSubmit, initialValu
         }
     }, [open]);
 
+    const validationSchema = useMemo(
+        () =>
+            Yup.object({
+                materialId: Yup.number()
+                    .min(1, t('common.validation.select_material'))
+                    .required(t('common.validation.required')),
+                unitsToPick: Yup.number()
+                    .min(0, t('common.validation.negative_amount'))
+                    .required(t('common.validation.required')),
+                isDefault: Yup.boolean()
+            }),
+        [t]
+    );
+
     const formik = useFormik({
         initialValues: initialValues || {
             materialId: 0,
@@ -34,11 +50,7 @@ export const LocationMaterialDialogMui = ({ open, onClose, onSubmit, initialValu
             isDefault: false
         } as unknown as Partial<LocationMaterial>,
         enableReinitialize: true,
-        validationSchema: Yup.object({
-            materialId: Yup.number().min(1, "Debe seleccionar un material").required("Obligatorio"),
-            unitsToPick: Yup.number().min(0, "La cantidad no puede ser negativa").required("Obligatorio"),
-            isDefault: Yup.boolean()
-        }),
+        validationSchema,
         onSubmit: (values) => {
             onSubmit(values);
         }
@@ -47,7 +59,7 @@ export const LocationMaterialDialogMui = ({ open, onClose, onSubmit, initialValu
 
     return (
         <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-            <DialogTitle>{initialValues ? "Editar Asignación" : "Asignar Material a la Localización"}</DialogTitle>
+            <DialogTitle>{initialValues ? t('location_materials.dialog.edit_title') : t('location_materials.dialog.create_title')}</DialogTitle>
             <form onSubmit={formik.handleSubmit}>
                 <DialogContent>
                     <Box sx={{ display: "flex", flexDirection: "column", gap: 3, mt: 1 }}>
@@ -64,7 +76,7 @@ export const LocationMaterialDialogMui = ({ open, onClose, onSubmit, initialValu
                             renderInput={(params) => (
                                 <TextField
                                     {...params}
-                                    label="Material"
+                                    label={t('location_materials.dialog.material_label')}
                                     error={formik.touched.materialId && Boolean(formik.errors.materialId)}
                                     helperText={formik.touched.materialId && formik.errors.materialId}
                                     InputProps={{
@@ -95,7 +107,7 @@ export const LocationMaterialDialogMui = ({ open, onClose, onSubmit, initialValu
                             fullWidth
                             type="number"
                             name="unitsToPick"
-                            label="Cantidad"
+                            label={t('location_materials.columns.quantity')}
                             value={formik.values.unitsToPick}
                             onChange={formik.handleChange}
                             inputProps={{ min: 0, step: "any" }}
@@ -109,13 +121,13 @@ export const LocationMaterialDialogMui = ({ open, onClose, onSubmit, initialValu
                                     onChange={formik.handleChange}
                                 />
                             }
-                            label="Ubicacion Principal"
+                            label={t('location_materials.checkbox_primary_location')}
                         />
                     </Box>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={onClose} color="error">Cancelar</Button>
-                    <Button type="submit" variant="contained" color="primary">Guardar</Button>
+                    <Button onClick={onClose} color="error">{t('common.buttons.cancel')}</Button>
+                    <Button type="submit" variant="contained" color="primary">{t('common.buttons.save')}</Button>
 
                 </DialogActions>
             </form>

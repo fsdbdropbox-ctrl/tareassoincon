@@ -2,7 +2,7 @@ import {
     Dialog, DialogTitle, DialogContent, DialogActions,
     Button, TextField, Box, FormControlLabel, Checkbox, Switch, Typography
 } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import * as Yup from "yup";
 import { useFormik } from "formik";
 import { MasterLocation } from "../../types/MasterLocations";
@@ -15,6 +15,8 @@ import { SecureImage } from "../common/images/SecureImage";
 
 import { deleteDocument, processFileUpload } from "../../api/documentService";
 
+import { useTranslation } from "react-i18next";
+
 registerPlugin(FilePondPluginImagePreview);
 
 interface LocationDialogProps {
@@ -26,13 +28,18 @@ interface LocationDialogProps {
 
 export const LocationDialogMui = ({ open, onClose, onSave, locationToEdit }: LocationDialogProps) => {
 
+    const { t } = useTranslation();
 
-    const validationSchema = Yup.object().shape({
-        code: Yup.string().required("El código es requerido"),
-        name: Yup.string().required("El nombre es requerido"),
-        externalCode: Yup.string().nullable(),
-        description: Yup.string().nullable()
-    });
+    const validationSchema = useMemo(
+        () =>
+            Yup.object().shape({
+                code: Yup.string().required(t('common.validation.code_req')),
+                name: Yup.string().required(t('common.validation.name_req')),
+                externalCode: Yup.string().nullable(),
+                description: Yup.string().nullable()
+            }),
+        [t]
+    );
 
     const formik = useFormik({
 
@@ -69,7 +76,7 @@ export const LocationDialogMui = ({ open, onClose, onSave, locationToEdit }: Loc
             return;
         }
 
-        const confirm = window.confirm("¿Seguro que quieres borrar la imagen de la base de datos?")
+        const confirm = window.confirm(t('common.image.delete_confirm'))
         if (!confirm) return;
 
         setIsDeletingImg(true);
@@ -78,7 +85,7 @@ export const LocationDialogMui = ({ open, onClose, onSave, locationToEdit }: Loc
             formik.setFieldValue("imageUuid", "");
         } catch (error) {
             console.error("Error al borrar la imagen: " + error);
-            alert("Hubo un error al intentar borrar la imagen del servidor")
+            alert(t('common.image.delete_error'));
         } finally {
             setIsDeletingImg(false);
         }
@@ -87,7 +94,7 @@ export const LocationDialogMui = ({ open, onClose, onSave, locationToEdit }: Loc
     return (
         <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
             <DialogTitle sx={{ backgroundColor: "#1b6e1b", color: "white" }}>
-                {locationToEdit ? "Editar Localización" : "Crear Localización"}
+                {locationToEdit?.imageUuid ? t('locations.dialog.image_edit') : t('locations.dialog.image_new')}
             </DialogTitle>
 
             <form onSubmit={formik.handleSubmit}>
@@ -96,7 +103,7 @@ export const LocationDialogMui = ({ open, onClose, onSave, locationToEdit }: Loc
 
                         <Box>
                             <Typography variant="subtitle2" gutterBottom>
-                                {locationToEdit?.imageUuid ? "Sustituir Imagen Actual" : "Subir Imagen de la Localización"}
+                                {locationToEdit?.imageUuid ? t('locations.dialog.image_edit') : t('locations.dialog.image_new')}
                             </Typography>
                             {formik.values.imageUuid ? (
                                 <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, p: 2, border: '1px dashed #ccc', borderRadius: 1, bgcolor: '#fafafa' }}>
@@ -117,7 +124,7 @@ export const LocationDialogMui = ({ open, onClose, onSave, locationToEdit }: Loc
                                             disabled={isDeletingImg}
                                             sx={{ mt: 1 }}
                                         >
-                                            {isDeletingImg ? "Borrando de la BBDD..." : "Eliminar Imagen"}
+                                            {isDeletingImg ? t('common.status.deleting') : t('common.buttons.delete_image')}
                                         </Button>                                    </Typography>
 
                                 </Box>
@@ -126,7 +133,7 @@ export const LocationDialogMui = ({ open, onClose, onSave, locationToEdit }: Loc
                                     allowMultiple={false}
                                     maxFiles={1}
                                     name="file"
-                                    labelIdle='Arrastra tu imagen o <span class="filepond--label-action">Examina</span>'
+                                    labelIdle={t('common.image.drag_drop')}
                                     server={{
                                         process: (fieldName, file, metadata, load, error, progress, abort) => {
                                             return processFileUpload(fieldName, file, metadata, load, error, progress, abort);
@@ -147,7 +154,7 @@ export const LocationDialogMui = ({ open, onClose, onSave, locationToEdit }: Loc
                         <TextField
                             type="text"
                             name="code"
-                            label="Código *"
+                            label={`${t('common.filters.code')} *`}
                             value={formik.values.code}
                             onChange={formik.handleChange}
                             onBlur={formik.handleBlur}
@@ -158,7 +165,7 @@ export const LocationDialogMui = ({ open, onClose, onSave, locationToEdit }: Loc
                         <TextField
                             type="text"
                             name="name"
-                            label="Nombre *"
+                            label={`${t('common.filters.name')} *`}
                             value={formik.values.name}
                             onChange={formik.handleChange}
                             onBlur={formik.handleBlur}
@@ -168,7 +175,7 @@ export const LocationDialogMui = ({ open, onClose, onSave, locationToEdit }: Loc
                         <TextField
                             type="text"
                             name="externalCode"
-                            label="Código Externo"
+                            label={t('common.filters.externalCode')}
                             value={formik.values.externalCode}
                             onChange={formik.handleChange}
                             onBlur={formik.handleBlur}
@@ -176,7 +183,7 @@ export const LocationDialogMui = ({ open, onClose, onSave, locationToEdit }: Loc
                         <TextField
                             type="text"
                             name="description"
-                            label="Descripción"
+                            label={t('common.filters.description')}
                             value={formik.values.description}
                             onChange={formik.handleChange}
                             onBlur={formik.handleBlur}
@@ -193,7 +200,7 @@ export const LocationDialogMui = ({ open, onClose, onSave, locationToEdit }: Loc
                                         color="primary"
                                     />
                                 }
-                                label="Permite Almacenar"
+                                label={t('locations.columns.allow_storage')}
                             />
                             <FormControlLabel
                                 control={
@@ -204,11 +211,11 @@ export const LocationDialogMui = ({ open, onClose, onSave, locationToEdit }: Loc
                                         color="primary"
                                     />
                                 }
-                                label="Permite Solicitudes"
+                                label={t('locations.columns.allow_requests')}
                             />
                             <Box sx={{ display: "flex", alignItems: "center", mt: 1 }}>
                                 <Typography color={formik.values.allowOtherMaterials ? "textSecondary" : "textPrimary"}>
-                                    Ordenada
+                                    {t('locations.management_types.ordered')}
                                 </Typography>
                                 <Switch
                                     name="allowOtherMaterials"
@@ -217,7 +224,7 @@ export const LocationDialogMui = ({ open, onClose, onSave, locationToEdit }: Loc
                                     color="warning"
                                 />
                                 <Typography color={formik.values.allowOtherMaterials ? "textPrimary" : "textSecondary"}>
-                                    Caótica
+                                    {t('locations.management_types.chaotic')}
                                 </Typography>
                             </Box>
                         </Box>
@@ -226,12 +233,12 @@ export const LocationDialogMui = ({ open, onClose, onSave, locationToEdit }: Loc
                 </DialogContent>
 
                 <DialogActions>
-                    <Button onClick={onClose} color="error">Cancelar</Button>
+                    <Button onClick={onClose} color="error">{t('common.buttons.cancel')}</Button>
                     <Button onClick={() => formik.resetForm()} type="reset" variant="outlined" color="secondary">
-                        Limpiar
+                        {t('common.buttons.clear')}
                     </Button>
                     <Button type="submit" variant="contained" color="primary">
-                        {locationToEdit ? "Guardar Cambios" : "Crear Localización"}
+                        {locationToEdit ? t('common.buttons.save_changes') : t('locations.dialog.create_title')}
                     </Button>
                 </DialogActions>
             </form>

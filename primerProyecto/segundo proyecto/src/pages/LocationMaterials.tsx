@@ -65,8 +65,8 @@ export const LocationMaterials = () => {
                 const materialInfo = materialDic.get(item.materialId);
                 return {
                     ...item,
-                    materialCode: materialInfo ? materialInfo.code : "N/A",
-                    materialName: materialInfo ? materialInfo.name : "Desconocido",
+                    materialCode: materialInfo ? materialInfo.code : t('common.status.na'),
+                    materialName: materialInfo ? materialInfo.name : t('common.status.unknown'),
                     externalCode: materialInfo ? materialInfo.externalCode : "",
                     description: materialInfo ? materialInfo.description : "",
                     measureUnitId: materialInfo ? materialInfo.measureUnitId : "",
@@ -91,7 +91,7 @@ export const LocationMaterials = () => {
         } finally {
             setLoading(false);
         }
-    }, [selectedLocationId]);
+    }, [selectedLocationId, t]);
 
     useEffect(() => {
         fetchLocationData();
@@ -167,7 +167,7 @@ export const LocationMaterials = () => {
                     {t('location_materials.view_title')} {locationDetail?.name || t('common.status.loading')}
                 </Typography>
                 <Typography variant="body2" color="textSecondary">
-                    {t('common.filters.code')}: {locationDetail?.code || "---"} | ID: {selectedLocationId}
+                    {t('common.filters.code')}: {locationDetail?.code || "---"} | {t('common.labels.id')}: {selectedLocationId}
                 </Typography>
             </Box>
 

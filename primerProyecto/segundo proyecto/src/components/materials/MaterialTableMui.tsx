@@ -4,7 +4,8 @@ import { Box, Button } from "@mui/material";
 import { useState } from "react";
 import { SecureImage } from "../common/images/SecureImage";
 import { useParams } from "react-router-dom";
-import { LiveTvSharp } from "@mui/icons-material";
+import { useTranslation } from "react-i18next";
+
 
 
 interface MaterialTableProps {
@@ -43,10 +44,11 @@ export const MaterialTableMui = ({
     selectedIds,
     stockMap
 }: MaterialTableProps) => {
+    const { t } = useTranslation();
     const columns: GridColDef[] = [
         {
             field: "imageUuid",
-            headerName: "Img",
+            headerName: t('common.image.col_header'),
             width: 70,
             sortable: false,
             filterable: false,
@@ -61,28 +63,28 @@ export const MaterialTableMui = ({
                 />
             )
         },
-        { field: "code", headerName: "Código", flex: 1, align: "center", headerAlign: "center" },
-        { field: "name", headerName: "Nombre", flex: 1, align: "center", headerAlign: "center" },
-        { field: "externalCode", headerName: "Código Externo", flex: 1, align: "center", headerAlign: "center" },
-        { field: "description", headerName: "Descripción", flex: 1, align: "center", headerAlign: "center" },
-        { field: "measureUnitId", headerName: "Unidad de Medida", flex: 1, align: "center", headerAlign: "center" },
+        { field: "code", headerName: t('common.filters.code'), flex: 1, align: "center", headerAlign: "center" },
+        { field: "name", headerName: t('common.filters.name'), flex: 1, align: "center", headerAlign: "center" },
+        { field: "externalCode", headerName: t('common.filters.externalCode'), flex: 1, align: "center", headerAlign: "center" },
+        { field: "description", headerName: t('common.filters.description'), flex: 1, align: "center", headerAlign: "center" },
+        { field: "measureUnitId", headerName: t('materials.columns.measure_unit'), flex: 1, align: "center", headerAlign: "center" },
         {
             field: "materialType",
-            headerName: "Tipo de Material",
+            headerName: t('materials.columns.type'),
             flex: 1,
             align: "center",
             headerAlign: "center",
             valueGetter: (params, row) => {
-                if (row.isRawMaterial) return "Materia Prima";
-                if (row.isSemifinished) return "Semielaborado";
-                if (row.isFinished) return "Producto Terminado";
-                return "Otro";
+                if (row.isRawMaterial) return t('materials.types.raw');
+                if (row.isSemifinished) return t('materials.types.semi');
+                if (row.isFinished) return t('materials.types.finished');
+                return t('materials.types.other');
             }
         },
-        { field: "observations", headerName: "Observaciones", flex: 1, align: "center", headerAlign: "center" },
+        { field: "observations", headerName: t('materials.columns.observations'), flex: 1, align: "center", headerAlign: "center" },
         {
             field: "stock",
-            headerName: "Stock Físico",
+            headerName: t('materials.columns.stock'),
             flex: 1,
             align: "center",
             headerAlign: "center",
@@ -119,14 +121,14 @@ export const MaterialTableMui = ({
                             onClick={onAddClick}
                             sx={{ backgroundColor: "#298d29", color: "white", fontWeight: "bold", "&:hover": { backgroundColor: "#1e6b1e" } }}
                         >
-                            + Agregar Material
+                            {t('materials.add_button')}
                         </Button>
                         <Button
                             variant="contained"
                             onClick={onDeleteSelected}
                             sx={{ backgroundColor: "#c0392b", color: "white", fontWeight: "bold", "&:hover": { backgroundColor: "#a93226" } }}
                         >
-                            - Borrar Seleccionados ({selectedIds.ids.size})
+                            {t('common.buttons.delete_selected', { count: selectedIds.ids.size })}
                         </Button>
                     </>
                 )}
@@ -167,10 +169,16 @@ export const MaterialTableMui = ({
                 rowSelectionModel={selectedIds}
 
                 localeText={{
+
+
+                    paginationRowsPerPage: t('common.table.rows_per_page'),
+
                     paginationDisplayedRows: ({ from, to, count }) => {
-                        if (loading) return "Cargando...";
-                        return `${from}–${to} de ${count !== -1 ? count : `más de ${to}`}`;
-                    }
+                        if (loading) return t('common.status.loading');
+                        return `${from}–${to} ${t('common.table.of')} ${count !== -1 ? count : `${t('common.table.more_than')} ${to}`}`;
+                    },
+
+                    footerRowSelected: (count) => t('common.buttons.delete_selected', { count })
                 }}
 
                 sx={{

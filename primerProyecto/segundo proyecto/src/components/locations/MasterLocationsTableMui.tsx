@@ -4,6 +4,8 @@ import { MasterLocation } from "../../types/MasterLocations";
 import { SecureImage } from "../common/images/SecureImage";
 import CheckBoxIcon from "@mui/icons-material/CheckBox";
 import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
+import { useTranslation } from "react-i18next";
+
 interface Props {
     data: MasterLocation[];
     loading?: boolean;
@@ -30,10 +32,12 @@ export const MasterLocationsTableMui = ({
     onDeleteSelected,
     onEditSelected
 }: Props) => {
+    const { t } = useTranslation();
+
     const columns: GridColDef[] = [
         {
             field: "imageUuid",
-            headerName: "Img",
+            headerName: t('common.image.col_header'),
             sortable: false,
             filterable: false,
             align: "center",
@@ -47,11 +51,11 @@ export const MasterLocationsTableMui = ({
                 />
             )
         },
-        { field: "code", headerName: "Código", width: 130 },
-        { field: "name", headerName: "Nombre", flex: 1 },
+        { field: "code", headerName: t('common.filters.code'), width: 130 },
+        { field: "name", headerName: t('common.filters.name'), flex: 1 },
         {
             field: "allowStorage",
-            headerName: "Permite Almacenar",
+            headerName: t('locations.columns.allow_storage'),
             width: 150,
             align: "center",
             renderCell: (params) => (
@@ -64,15 +68,15 @@ export const MasterLocationsTableMui = ({
         },
         {
             field: "allowOtherMaterials",
-            headerName: "Gestión",
+            headerName: t('locations.columns.management'),
             width: 150,
             align: "center",
 
-            renderCell: (params) => params.row.allowOtherMaterials ? "Caótica" : "Ordenada"
+            renderCell: (params) => params.row.allowOtherMaterials ? t('locations.management_types.chaotic') : t('locations.management_types.ordered')
         },
         {
             field: "allowMaterialRequests",
-            headerName: "Permite Solicitudes",
+            headerName: t('locations.columns.allow_requests'),
             width: 160,
             align: "center",
             renderCell: (params) => (
@@ -100,7 +104,7 @@ export const MasterLocationsTableMui = ({
                             onEditSelected(Number(singleId));
                         }}
                     >
-                        Editar Seleccionado
+                        {t('common.buttons.edit_selected')}
                     </Button>
                 )}
 
@@ -110,7 +114,7 @@ export const MasterLocationsTableMui = ({
                         color="error"
                         onClick={onDeleteSelected}
                     >
-                        - Eliminar ({selectedCount})
+                        {t('common.buttons.delete_selected', { count: selectedCount })}
                     </Button>
                 )}
             </Box>
@@ -134,6 +138,13 @@ export const MasterLocationsTableMui = ({
                 onPaginationModelChange={onPaginationModelChange}
 
                 pageSizeOptions={[5, 10, 25]}
+                localeText={{
+                    paginationRowsPerPage: t('common.table.rows_per_page'),
+                    paginationDisplayedRows: ({ from, to, count }) => {
+                        if (loading) return t('common.status.loading');
+                        return `${from}–${to} ${t('common.table.of')} ${count !== -1 ? count : `${t('common.table.more_than')} ${to}`}`;
+                    },
+                }}
                 sx={{
                     border: "1px solid black",
                     cursor: "pointer",

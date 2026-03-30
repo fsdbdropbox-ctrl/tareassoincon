@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Box, Button, TextField } from "@mui/material";
+import { useTranslation } from "react-i18next";
 
 export interface GeneralFilterValues {
     code: string,
@@ -13,6 +14,7 @@ interface GeneralFilterProps {
 }
 
 export const GeneralFilter = ({ onFilter }: GeneralFilterProps) => {
+    const { t } = useTranslation();
     const [filters, setFilters] = useState<GeneralFilterValues>({
         code: "",
         name: "",
@@ -58,7 +60,7 @@ export const GeneralFilter = ({ onFilter }: GeneralFilterProps) => {
                 }}
             >
                 <TextField
-                    label="Código"
+                    label={t('common.filters.code')}
                     name="code"
                     value={filters.code}
                     onChange={handleInputChange}
@@ -66,21 +68,21 @@ export const GeneralFilter = ({ onFilter }: GeneralFilterProps) => {
                     size="small"
                 />
                 <TextField
-                    label="Nombre"
+                    label={t('common.filters.name')}
                     name="name"
                     value={filters.name}
                     onChange={handleInputChange}
                     fullWidth
                     size="small"
                 /><TextField
-                    label="Código Externo"
+                    label={t('common.filters.externalCode')}
                     name="externalCode"
                     value={filters.externalCode}
                     onChange={handleInputChange}
                     fullWidth
                     size="small"
                 /><TextField
-                    label="Descripción"
+                    label={t('common.filters.description')}
                     name="description"
                     value={filters.description}
                     onChange={handleInputChange}
@@ -96,13 +98,13 @@ export const GeneralFilter = ({ onFilter }: GeneralFilterProps) => {
                         color: "#1b581b",
                         "&:hover": { backgroundColor: "#f0f0f0", borderColor: "black" }
                     }}
-                >Limpiar</Button>
+                >{t('common.buttons.clear')}</Button>
                 <Button variant="contained" onClick={() => onFilter(filters)}
                     sx={{
                         backgroundColor: "#298d29",
                         "&:hover": { backgroundColor: "#1b581b", color: "white" }
                     }}
-                >Buscar</Button>
+                >{t('common.buttons.search')}</Button>
             </Box>
 
         </Box>
